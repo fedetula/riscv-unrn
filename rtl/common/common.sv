@@ -1,5 +1,8 @@
 package Common;
 
+  parameter XLEN = 32;
+
+
    typedef logic[4:0] regId_t;
    typedef logic [63:0] uint64_t;
    typedef logic signed [63:0] int64_t;
@@ -40,9 +43,13 @@ package Common;
                         {
                          ALU_AND = 'b0000,
                          ALU_OR  = 'b0001,
-                         ALU_add = 'b0010,
-                         ALU_sub = 'b0110
-                         } ALU_control_t;
+                         ALU_ADD = 'b0010,
+                         ALU_SUB = 'b0110,
+                         ALU_SLL,
+                         ALU_SRL,
+                         ALU_SLA,
+                         ALU_SRA
+                         } alu_control_t;
 
    typedef struct packed      {
       logic             is_branch;
@@ -50,7 +57,7 @@ package Common;
       logic             mem_write;
       logic             mem_to_reg;
       logic             alu_from_imm;
-      ALU_control_t     alu_op;
+      alu_control_t     alu_op;
       logic             reg_write;
    } control_out_t;
 
@@ -124,7 +131,7 @@ package Common;
    function decoded_instr_t decode_instruction(raw_instr_t instr);
       decoded_instr_t result;
       instr_type_t instr_type;
-      
+
       result.opcode = get_opcode(instr);
       instr_type = get_instr_type(result.opcode);
       case (instr_type)
