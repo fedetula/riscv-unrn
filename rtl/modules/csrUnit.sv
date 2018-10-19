@@ -4,16 +4,21 @@ import riscV_unrn_pkg::*;
 
 module csrUnit
   (
-  //Clock and Reset
+  // Clock and Reset
   input logic clk, rst,
-
+  // From CSR Instructions
   input csr_op_t op_i,
   input csr_num_t address_i,
   input logic [4:0] rd,
-  input logic [31:0] pc,
+  // From datapath
   input logic [XLEN-1:0] data_i,
-  output logic [XLEN-1:0] data_o);
-
+  output logic [XLEN-1:0] data_o,
+  // Exceptions
+  input logic [31:0] pc,        // Actual PC causing the exception
+  input logic excRequest,       // EXception request from controller
+  input logic [31:0] excCause,  // Exception Cause Code
+  output logic exc              // We have an exception if enabled
+  );
   //////////////////////////
   // Internal Signals
   //////////////////////////
@@ -24,16 +29,23 @@ module csrUnit
 
   // Operation decode and write data setup
   always_comb begin
-    //csrWData = data_i;
+    csrWrite = data_i;
     we = (rd == 0) ? 0 : 1;  //Do not write to CSRs if destination register is x0
     unique case (op_i)
+      CSRRNOP: we = 0;
       CSRRW: csrWrite = data_i;
       CSRRS: csrWrite = data_i | csrRead;
       CSRRC: csrWrite = (~data_i) & csrRead;
-      default: ;
     endcase
   end
 
+  ////////////////////////////////
+  // Constant output assignments
+  ////////////////////////////////
+  assign data_o = csrRead;
+
+  // TODO
+  // Check if enabled and pending interrupt match
 
   //////////////////////////
   // Implemented Registers
@@ -59,20 +71,24 @@ module csrUnit
   ///////////////
   always_comb begin
 
-    unique case (address_i)
+    case (address_i)
       CSR_MSTATUS:  csrRead = mstatus_reg;
       CSR_MTVEC:    csrRead = mtvec_reg;
       CSR_MIP:      csrRead = mip_reg;
       CSR_MIE:      csrRead = mie_reg;
       CSR_MSCRATCH: csrRead = mscratch_reg;
-      default: ;
+      CSR_MEPC:     csrRead = mepc_reg;
+      CSR_MCAUSE:   csrRead = mcause_reg;
+      CSR_MTVAL:    csrRead = mtval_reg;
+      default:      csrRead = 32'b0;
     endcase
 
   end
+
   ///////////////
   // Write Logic
   //////////////
-  always_comb begin
+  always_comb begin : write_logic
 
     mstatus_next   = mstatus_reg;
     mtvec_next     = mtvec_reg;
@@ -101,33 +117,50 @@ module csrUnit
                      end
 
         CSR_MTVEC:    begin
-                        //TODO: Define if writeable
-                        mtvec_next = {csrWrite[31:2],2'b0} //Two LSBs hardwired to zero
-                        //Or not
-                        //mtvec_next = MTEVC_BASE_ADDRESS
+                        mtvec_next = {csrWrite[31:2],2'b0}; //Two LSBs hardwired to zero
                       end
-
         CSR_MIP:      begin
-                      //TODO: Define which bits are writeable through CSR instructions, apparently none for this implementation
+                      // No U or S Modes, we do not write to mip register
                       end
-        CSR_MIE:      begin:
+        CSR_MIE:      begin
                         mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
                       end
-        CSR_MSCRATCH: begin:
+        CSR_MSCRATCH: begin
                         mscratch_next = csrWrite;
                       end
-        default: ;
+        CSR_MEPC:     begin
+                        mscratch_next = {csrWrite[31:2],2'b0};
+                      end
+        //default: ;
       endcase
+
     end
 
+    //////////////////////
+    // Manage exceptions
+    //////////////////////
 
-  end
+    if (excRequest & mstatus_reg.mie) begin     //Exception request fromm controller
+      mip_next.meip = mie_next.meie;            // Raise pending exception flag if enabled
+      // mstatus??
+      mepc_next = pc;         // Save actual pc
+      mcause_next = excCause;  // Register exception cause
+    end
+
+  end : write_logic
+
 
 
   always_ff @ (posedge clk) begin
       if(rst) begin
-        //TODO: Review reset conditions for registers
-        mstatus_reg = '0;
+        mstatus_reg   <= '0;
+        mtvec_reg     <= '0;
+        mip_reg       <= '0;
+        mie_reg       <= '0;
+        mscratch_reg  <= '0;
+        mepc_reg      <= '0;
+        mcause_reg    <= '0;
+        mtval_reg     <= '0;
       end
       else  begin
         mstatus_reg   <= mstatus_next;
@@ -140,6 +173,7 @@ module csrUnit
         mtval_reg     <= mtval_next;
       end
   end
+
 
 
 endmodule
