@@ -18,7 +18,7 @@ package Common;
                          instr_type_S,
                          instr_type_SB,
                          instr_type_U,
-                         instr_type_UJ,
+                         instr_type_UJ
                          } instr_type_t;
 
    typedef enum         {
@@ -54,7 +54,7 @@ package Common;
 						 instr_andi,
 						 //COMPARE
 						 instr_slt,
-						 instr_sltIi,	
+						 instr_slti,	
 						 instr_sltu,
 						 instr_sltiu,
 						 //BRANCHES
@@ -90,7 +90,7 @@ package Common;
 						 instr_csrrci,
 						 //CHANGE LEVEL
 						 instr_ecall,
-						 instr_ebreak,
+						 instr_ebreak
                          } instr_e;
 				
    typedef enum	logic [3:0] {
@@ -191,7 +191,7 @@ package Common;
 			 'b010: return instr_sw;
            endcase
         end
-		instr_type_I begin
+		instr_type_I: begin
 		    unique casez ({opcode, instr.funct3, instr.imm[11:5]})
 			//I (Load's)
              'b0000011_000_xxxxxxx: return instr_lb;
@@ -210,6 +210,7 @@ package Common;
 			 'b0010011_110_xxxxxxx: return instr_ori;
 			 'b0010011_111_xxxxxxx: return instr_andi;
            endcase
+        end
         instr_type_U, instr_type_UJ: begin
 			unique case (opcode)
 			//SB (Branch's)
