@@ -9,16 +9,19 @@ module csrUnit
   // From CSR Instructions
   input csr_op_t op_i,
   input csr_num_t address_i,
-  input logic [4:0] rd,
   // From datapath
   input logic [XLEN-1:0] data_i,
   output logic [XLEN-1:0] data_o,
   // Exceptions
-  input logic [31:0] pc,        // Actual PC causing the exception
-  input logic excRequest,       // EXception request from controller
-  input logic [31:0] excCause,  // Exception Cause Code
-  output logic exc              // We have an exception if enabled
+  input logic [31:0] pc_i,            // Actual PC causing the exception
+  input logic excRequest_i,           // Exception request from controller
+  input logic [31:0] excCause_i,      // Exception Cause Code
+  input logic [31:0] trapInfo_i,      // Trap Informtation from Controller
+  output logic exc_o,                 // We have an exception if enabled
+  output logic [31:0] mtvec_o,        // Trap Vector output
+  output logic [31:0] mepc_o
   );
+
   //////////////////////////
   // Internal Signals
   //////////////////////////
@@ -30,7 +33,6 @@ module csrUnit
   // Operation decode and write data setup
   always_comb begin
     csrWrite = data_i;
-    we = (rd == 0) ? 0 : 1;  //Do not write to CSRs if destination register is x0
     unique case (op_i)
       CSRRNOP: we = 0;
       CSRRW: csrWrite = data_i;
@@ -43,9 +45,12 @@ module csrUnit
   // Constant output assignments
   ////////////////////////////////
   assign data_o = csrRead;
+  assign mtvec_o = mtvec_reg;
+  assign mepc_o = mepc_reg;
 
-  // TODO
+  // TODO : Verify this section
   // Check if enabled and pending interrupt match
+  assign exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.meip): 1'b0;
 
   //////////////////////////
   // Implemented Registers
@@ -69,7 +74,7 @@ module csrUnit
   ///////////////
   // Read Logic
   ///////////////
-  always_comb begin
+  always_comb begin : read_logic
 
     case (address_i)
       CSR_MSTATUS:  csrRead = mstatus_reg;
@@ -83,7 +88,7 @@ module csrUnit
       default:      csrRead = 32'b0;
     endcase
 
-  end
+  end : read_logic
 
   ///////////////
   // Write Logic
@@ -105,6 +110,13 @@ module csrUnit
                         mstatus_next = csrWrite;
                         //Hardwired fields
                         mstatus_next.uie = 1'b0;
+                        mstatus_next.sie = 1'b0;
+                        mstatus_next.wpri4 = 1'b0;
+                        mstatus_next.upie = 1'b0;
+                        mstatus_next.spie = 1'b0;rd
+                        mstatus_next.wpri3 = 1'b0;
+                        mstatus_next.spp = 1'b0;
+                        mstatus_next.wpri2 = 1'b0;
                         mstatus_next.fs = 2'b0;
                         mstatus_next.xs = 2'b0;
                         mstatus_next.mprv = 1'b0;
@@ -113,6 +125,7 @@ module csrUnit
                         mstatus_next.tvm = 1'b0;
                         mstatus_next.tw = 1'b0;
                         mstatus_next.tsr = 1'b0;
+                        mstatus_next.wpri1 = 8'b0;
                         mstatus_next.sd = 1'b0;
                      end
 
@@ -120,7 +133,7 @@ module csrUnit
                         mtvec_next = {csrWrite[31:2],2'b0}; //Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
-                      // No U or S Modes, we do not write to mip register
+                      // No U or S Modes, we do not write to mip register through csr instructions
                       end
         CSR_MIE:      begin
                         mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
@@ -129,22 +142,31 @@ module csrUnit
                         mscratch_next = csrWrite;
                       end
         CSR_MEPC:     begin
-                        mscratch_next = {csrWrite[31:2],2'b0};
+                        mepc_next = {csrWrite[31:2],2'b0};
+                      end
+        CSR_MCAUSE:   begin
+                        mcause_next = csrWrite; // TODO: Verify if we protect form writing illegal exception values
+                      end
+        CSR_MTVAL:    begin
+                        mtval_next = csrWrite;
                       end
         //default: ;
       endcase
 
     end
 
-    //////////////////////
-    // Manage exceptions
-    //////////////////////
+    ////////////////////////////
+    // Manage exception Inputs
+    ////////////////////////////
 
-    if (excRequest & mstatus_reg.mie) begin     //Exception request fromm controller
+    if (excRequest_i & mstatus_reg.mie) begin     //Exception request fromm controller
       mip_next.meip = mie_next.meie;            // Raise pending exception flag if enabled
       // mstatus??
-      mepc_next = pc;         // Save actual pc
-      mcause_next = excCause;  // Register exception cause
+      mepc_next = pc_i;         // Save actual pc
+      mcause_next = excCause_i;  // Register exception cause
+
+      mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
+
     end
 
   end : write_logic

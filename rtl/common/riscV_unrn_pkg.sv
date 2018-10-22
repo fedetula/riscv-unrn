@@ -80,7 +80,7 @@ package riscV_unrn_pkg;
     logic         upie;   //User Prior (to trap) Interrupt Enable bit          - 0 if U Mode not Implemented
     logic         mie;    //Machine Interrupt Enable bit
     logic         wpri4;  //Not implemented section
-    logic         sie;    //Supervisor Interrupt Enable bit
+    logic         sie;    //Supervisor Interrupt Enable bit                    - 0 if S Mode not Implemented
     logic         uie;    //User Interrupt Enable bit                          - 0 if U Mode not Implemented
   }mstatus_csr_t;
 
