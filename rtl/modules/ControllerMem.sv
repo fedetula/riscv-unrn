@@ -1,10 +1,10 @@
 import Common::*;
 
 module ControlMem(
- input       uint32_t address, write_data,dataMemOut,
+ input       uint32_t write_data,dataMemOut,
+ input logic [1:0] address,
  input logic [3:0] instType,
  output      uint32_t dataMemIn,dataRead,
- output logic [29:0] adress_mem,
  output logic [3:0] maskByte,
  output logic read,write,exception
  );
@@ -175,7 +175,6 @@ module ControlMem(
         			end
   		4'1111: begin   //Load Unsigned Half
         				read = 1;
-                //dataMemIn = write_data; LEA:esto estaba antes, yo lo borraria
         				case(address[1:0])
             				0: begin
               					   exception=0;
