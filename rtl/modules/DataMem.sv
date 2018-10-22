@@ -49,9 +49,6 @@ always_ff @(posedge clk) begin
   			8:   mem[address_aux][3] = writeValue[7:0];//1 byte copy
   			12:  mem[address_aux][3:2] = writeValue[15:0]; //2 byte copy / debe ser little-endian
   			15:  mem[address_aux] = writeValue[31:0]; //4 byte copy / debe ser little-endian
-  /* 				mem[address-1] = writeValue[15:8];
-  				mem[address-2] = writeValue[23:16];//no recuerdo la organizacion de la memoria, se cambia - por +
-  				mem[address-3] = writeValue[31:24]; */
   			end
 			endcase
 		end
