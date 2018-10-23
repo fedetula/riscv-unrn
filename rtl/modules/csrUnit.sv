@@ -19,7 +19,13 @@ module csrUnit
   input logic [31:0] trapInfo_i,      // Trap Informtation from Controller
   output logic exc_o,                 // We have an exception if enabled
   output logic [31:0] mtvec_o,        // Trap Vector output
-  output logic [31:0] mepc_o
+  output logic [31:0] mepc_o,
+  // Timers
+  input logic [31:0] mtimeData_i,
+  input logic mtimeWe_i,
+  input mtime_address_t mtimeAddress_i,
+  output logic [31:0] mtimeData_o
+
   );
 
   //////////////////////////
@@ -27,12 +33,12 @@ module csrUnit
   //////////////////////////
 
   csr_raw_t csrWrite, csrRead;
-  logic     we;
-
+  logic     we;   // Write enable to registers
 
   // Operation decode and write data setup
   always_comb begin
     csrWrite = data_i;
+    we = 1;
     unique case (op_i)
       CSRRNOP: we = 0;
       CSRRW: csrWrite = data_i;
@@ -66,6 +72,8 @@ module csrUnit
   csr_raw_t     mcause_reg, mcause_next;
   csr_raw_t     mtval_reg, mtval_next;
 
+  csr_raw64_t   mtime_reg, mtime_next;
+  csr_raw64_t   mtimecmp_reg, mtimecmp_next;
 
   ////////////////////
   // Actual Registers
@@ -74,8 +82,9 @@ module csrUnit
   ///////////////
   // Read Logic
   ///////////////
-  always_comb begin : read_logic
 
+  // Common CSRs
+  always_comb begin : read_logic
     case (address_i)
       CSR_MSTATUS:  csrRead = mstatus_reg;
       CSR_MTVEC:    csrRead = mtvec_reg;
@@ -87,6 +96,15 @@ module csrUnit
       CSR_MTVAL:    csrRead = mtval_reg;
       default:      csrRead = 32'b0;
     endcase
+
+  // Timer Registers
+      case (mtimeAddress_i)
+        MTIME_LOW:      mtimeData_o = mtime_reg[31:0];
+        MTIME_HIGH:     mtimeData_o = mtime_reg[63:32];
+        MTIMECMP_LOW:   mtimeData_o = mtimecmp_reg[31:0];
+        MTIMECMP_HIGH:  mtimeData_o = mtimecmp_reg[63:32];
+        default: ;
+      endcase
 
   end : read_logic
 
@@ -113,7 +131,7 @@ module csrUnit
                         mstatus_next.sie = 1'b0;
                         mstatus_next.wpri4 = 1'b0;
                         mstatus_next.upie = 1'b0;
-                        mstatus_next.spie = 1'b0;rd
+                        mstatus_next.spie = 1'b0;
                         mstatus_next.wpri3 = 1'b0;
                         mstatus_next.spp = 1'b0;
                         mstatus_next.wpri2 = 1'b0;
@@ -130,10 +148,10 @@ module csrUnit
                      end
 
         CSR_MTVEC:    begin
-                        mtvec_next = {csrWrite[31:2],2'b0}; //Two LSBs hardwired to zero
+                        mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
-                      // No U or S Modes, we do not write to mip register through csr instructions
+                        mip_next = csrWrite & 32'h080;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts
                       end
         CSR_MIE:      begin
                         mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
@@ -155,8 +173,25 @@ module csrUnit
 
     end
 
+    ///////////////////////////
+    //  Timer registers write
+    ///////////////////////////
+
+    // TODO: Timer exceptions/interrupts
+    mtime_next = mtime_reg + 1;
+    mtimecmp_next = mtimecmp_reg;
+    if (mtimeWe_i) begin
+      case (mtimeAddress_i)
+        MTIME_LOW:      mtime_next = {mtime_reg[63:32],mtimeData_i};
+        MTIME_HIGH:     mtime_next = {mtimeData_i,mtime_reg[31:0]};
+        MTIMECMP_LOW:   mtimecmp_next = {mtimecmp_reg[63:32],mtimeData_i};
+        MTIMECMP_HIGH:  mtimecmp_next = {mtimeData_i,mtimecmp_reg[31:0]};
+        default: ;
+      endcase
+    end
+
     ////////////////////////////
-    // Manage exception Inputs
+    // Manage exceptions
     ////////////////////////////
 
     if (excRequest_i & mstatus_reg.mie) begin     //Exception request fromm controller
@@ -168,6 +203,8 @@ module csrUnit
       mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
 
     end
+
+
 
   end : write_logic
 
@@ -183,6 +220,8 @@ module csrUnit
         mepc_reg      <= '0;
         mcause_reg    <= '0;
         mtval_reg     <= '0;
+        mtime_reg     <= '0;
+        mtimecmp_reg  <= '0;
       end
       else  begin
         mstatus_reg   <= mstatus_next;
@@ -193,6 +232,8 @@ module csrUnit
         mepc_reg      <= mepc_next;
         mcause_reg    <= mcause_next;
         mtval_reg     <= mtval_next;
+        mtime_reg     <= mtime_next;
+        mtimecmp_reg  <= mtimecmp_next;
       end
   end
 

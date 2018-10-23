@@ -56,6 +56,7 @@ package riscV_unrn_pkg;
   // Raw CSR typedef
   //////////////////////////////////////
   typedef logic [XLEN-1:0] csr_raw_t;
+  typedef logic [63:0] csr_raw64_t;
 
   //////////////////////////////////////
   // Machine Status Register (mstatus)
@@ -108,7 +109,7 @@ package riscV_unrn_pkg;
   // Machine Interrupt Enable Register (mie)
   //////////////////////////////////////
   // Enabled interrupts: External M-mode
-  localparam  SUPPORTED_INTERRUPTS_MASK = 32'h800;
+  localparam  SUPPORTED_INTERRUPTS_MASK = 32'h880;
   typedef struct packed {
     logic [XLEN-12:0] wiri1;  //Not implemented section
     logic             meie;   // M-mode external interrupt
@@ -129,10 +130,20 @@ package riscV_unrn_pkg;
   // Implemented Exception Codes
   ////////////////////////////////
   localparam  logic [31:0] M_EXT_INT   = (1 << 63) | 11;    // Machine external interrupt
+  localparam  logic [31:0] M_TIMER_INT = (1 << 63) | 7;     // Machine timer interrupt
   localparam  logic [31:0] M_ILL_INSTR = 2;                 // Illegal instruction
   localparam  logic [31:0] M_BREAK     = 3;                 // Breakpoint
   localparam  logic [31:0] M_ECALL     = 11;                // Enviroment call from M-Mode
 
+  /////////////////////////
+  // Timers address encoding
+  ////////////////////////
+  typedef enum logic [1:0]{
+    MTIME_LOW,
+    MTIME_HIGH,
+    MTIMECMP_LOW,
+    MTIMECMP_HIGH
+  }mtime_address_t;
    //
    // typedef logic[4:0] regId_t;
    // typedef logic [63:0] uint64_t;
