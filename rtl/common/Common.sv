@@ -104,7 +104,7 @@ package Common;
 						 ALU_sra = 'b1000,
 						 ALU_slt = 'b1001,
 						 ALU_sltu = 'b1011,
-						 ALU_xnor = 'b1010,
+						 ALU_xor = 'b1010,
 						 ALU_cge = 'b1100,
 						 ALU_cgeu = 'b1101,
 						 ALU_ce = 'b1110
