@@ -10,21 +10,23 @@ package Control;
     result.is_branch = instr_name == (Common::instr_beq || Common::instr_bne || Common::instr_blt || Common::instr_bge || Common::instr_bltu || Common::instr_bgeu);
 	
 	//is_jump (la linea 13 la deje comentada como opcion 2. Capaz reduce recursos)
-	//result.is_jump = instr_name == (Common::instr_jal || Common::instr_jalr); 
+	result.is_jump = instr_name == (Common::instr_jal || Common::instr_jalr); 
 	
 	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write ; unsign
 	case (opcode)
 		7'b0000011: begin//LOAD'S
-		////result.mem_read = 1;
-		result.is_jump = 0;
+		//result.is_branch=0;
 		//result.mem_write = 0;
+		//result.pcSource = 2'b00;
+		//result.mem_read = 1;
+		//result.is_jump = 0;
+		result.csr_source=0;
 		result.mem_to_reg = 1;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
 		result.regData = 2'00;
 		result.reg_write = 1;
 		result.alu_from_pc = 0;
-		//result.pcSource = 2'b00;
 		case (instr.funct3)
 			3'b000: begin
 			result.instType = 4'b1000;
@@ -44,18 +46,25 @@ package Control;
 			default begin
 			result.instType = 4'b0000;
 			end
+			default:
+			begin
+				//instr no valid
+			end
 		endcase
 		end
 		7'b0001111: begin //NO TENEMOS DEFINIDO EN EL EXCEL LOS VALORES PARA ESTE OPCODE, ES UN FENCE/FENCEI
+		//result.is_branch=0;
 		//result.mem_read = 0;
+		//result.mem_write = 0;
+		//result.pcSource = 2'b00;
+		//result.is_jump = 0;
+		result.csr_source=0;
 		result.regData = 2'00;
 		result.alu_from_pc = 0;
-		//result.mem_write = 0;
-		result.is_jump = 0;
 		result.mem_to_reg = 0;
 		result.alu_from_imm = 0;
 		result.alu_op = Common::ALU_add;
-		//result.pcSource = 2'b00;
+		
 		result.reg_write = 0;	
 		result.instType = 4'b0000;
 		end
@@ -63,9 +72,11 @@ package Control;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
 		//result.pcSource = 2'b00;
-		result.is_jump = 0;
+		//result.is_branch=0;
+		//result.is_jump = 0;
+		result.csr_source=0;
 		result.regData = 2'00;
-		result.alu_from_pc = 0;
+		result.alu_from_pc = 0;		
 		result.mem_to_reg = 0;
 		result.alu_from_imm = 1;
 		result.reg_write = 1;
@@ -102,15 +113,21 @@ package Control;
 			3'b111: begin
 			result.alu_op = Common::ALU_and;
 			end
+			default:
+			begin
+				//instr no valid
+			end
 		endcase		  
 		end
 		7'b0010111: begin//AUIPC
-		//result.mem_read = 0;
-		result.alu_from_pc = 1;
 		//result.mem_write = 0;
-		result.regData = 2'00;
+		//result.is_branch=0;
+		//result.mem_read = 0;
 		//result.pcSource = 2'b00;
-		result.is_jump = 0;
+		//result.is_jump = 0;
+		result.csr_source=0;
+		result.alu_from_pc = 1;
+		result.regData = 2'00;
 		result.mem_to_reg = 0;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
@@ -120,10 +137,12 @@ package Control;
 		7'b0100011: begin//STORE'S
 		//result.mem_read = 0;
 		//result.mem_write = 1;
+		//result.is_branch=0;
+		//result.pcSource = 2'b00;
+		//result.is_jump = 0;
+		result.csr_source=0;
 		result.regData = 2'00;
 		result.alu_from_pc = 0;
-		result.is_jump = 0;
-		//result.pcSource = 2'b00;
 		result.mem_to_reg = 0;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
@@ -138,18 +157,21 @@ package Control;
 			3'b010: begin
 			result.instType = 4'b1110;
 			end
-			default begin
+			default: begin
 			result.instType = 4'b0000;
+			//instr no valid
 			end
 		endcase
 		end
 		7'b0110011: begin//ARITHMETIC
 		//result.mem_read = 0;
 		//result.mem_write = 0;
+		//result.pcSource = 2'b00;
+		//result.is_branch=0;
+		//result.is_jump = 0;
+		result.csr_source=0;
 		result.alu_from_pc = 0;
 		result.regData = 2'00;
-		//result.pcSource = 2'b00;
-		result.is_jump = 0;
 		result.mem_to_reg = 0;
 		result.alu_from_imm = 0;
 		result.reg_write = 1;
@@ -192,18 +214,23 @@ package Control;
 			end
 			3'b111: begin
 			result.alu_op = Common::ALU_and;
-
-			end			
+			end	
+			default:
+			begin
+				//instr no valid
+			end
 		endcase		
 		end
 		7'b0110111: begin//LOAD INM
-		result.instType = 4'b0000;
+		//result.pcSource = 2'b00;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
+		//result.is_branch=0;
+		//result.is_jump = 0;
+		result.csr_source=0;
+		result.instType = 4'b0000;
 		result.mem_to_reg = 0;
 		result.regData = 2'11;
-		result.is_jump = 0;
-		//result.pcSource = 2'b00;
 		result.alu_from_pc = 0;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
@@ -213,11 +240,13 @@ package Control;
 		7'b1100011: begin//BRANCH'S
 		//result.mem_read = 0;
 		//result.mem_write = 0;
+		//result.is_branch=1;
+		//result.pcSource = 2'b00;
+		//result.is_jump = 0;
+		result.csr_source=0;
 		result.alu_from_pc = 0;
 		result.regData = 2'00;
-		result.is_jump = 0;
 		result.mem_to_reg = 0;
-		//result.pcSource = 2'b00;
 		result.alu_from_imm = 0;
 		result.reg_write = 0;
 		result.instType = 4'b0000;
@@ -240,15 +269,21 @@ package Control;
 			3'b111: begin
 			result.alu_op = Common::ALU_cgeu;
 			end
+			default:
+			begin
+				//instr no valid
+			end
 		endcase
 		end
 		7'b1100111: begin//JALR
 		//result.mem_read = 0;
 		//result.mem_write = 0;
+		//result.is_branch=0;
+		//result.pcSource = 2'b10;
+		//result.is_jump = 1;
+		result.csr_source=0;
 		result.alu_from_pc = 0;
 		result.regData = 2'01;
-		result.is_jump = 1;
-		//result.pcSource = 2'b10;
 		result.mem_to_reg = 0;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
@@ -259,30 +294,106 @@ package Control;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
 		//result.pcSource = 2'b10;
+		//result.is_branch=0;
+		//result.is_jump = 1;
+		result.csr_source=0;
 		result.alu_from_pc = 1;
 		result.mem_to_reg = 0;
-		result.is_jump = 1;
 		result.regData = 2'01;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
 		result.reg_write = 0;		  
 		result.instType = 4'b0000;
 		end
-		7'b1110011: begin // NO TENEMOS DEFINIDO EN EL EXCEL LOS VALORES PARA ESTE OPCODE, SON LAS PRIVILEGIADAS
+		7'b1110011: begin // Estan completadas un poco, falta ver que pasa si rs1=0x00 o rd=0x00
 		//result.mem_read = 0;
 		//result.mem_write = 0;
-		result.mem_to_reg = 0;
-		result.alu_from_pc = 0;
-		result.is_jump = 0;
+		//result.is_branch=0;
 		//result.pcSource = 2'b00;
-		result.regData = 2'10;
-		result.alu_from_imm = 0;
-		result.alu_op = Common::ALU_add;
-		result.reg_write = 0;	
+		//result.is_jump = 0;
+		result.alu_from_pc = 0;
 		result.instType = 4'b0000;
+		result.alu_op = Common::ALU_add;
+		result.mem_to_reg = 0;
+		result.alu_from_imm = 0;
+		case (instr.funct3)
+			3'b000: begin
+				case(instr.imm[2:0])
+				3'b000://ECALL
+				begin
+					result.csr_source=0;
+					result.regData = 2'10;
+					result.reg_write = 0;
+				end
+				3'b001://EBREAK
+				begin
+					result.csr_source=0;
+					result.regData = 2'10;
+					result.reg_write = 0;
+				end
+				3'b010://MRET
+				begin
+					result.csr_source=0;
+					result.regData = 2'10;
+					result.reg_write = 0;
+				end
+				3'b101://WFI
+				begin
+					result.csr_source=0;
+					result.regData = 2'10;
+					result.reg_write = 0;
+				end
+				default:
+				begin
+				//instr no valid
+				end
+				endcase
+			end
+			3'b001: begin
+			//CSRRW
+				result.csr_source=0;
+				result.regData = 2'10;
+				result.reg_write = 1;
+			end
+			3'b010: begin
+			//CSRRS
+				result.csr_source=0;
+				result.regData = 2'10;
+				result.reg_write = 1;
+			end
+			3'b011: begin
+			//CSRRC
+				result.csr_source=0;
+				result.regData = 2'10;
+				result.reg_write = 1;
+			end
+			3'b101: begin
+			//CSRRWI
+				result.csr_source=1;
+				result.regData = 2'10;
+				result.reg_write = 1;
+			end
+			3'b110: begin
+			//CSRRSI
+				result.csr_source=1;
+				result.regData = 2'10;
+				result.reg_write = 1;
+			end
+			3'b111: begin
+			//CSRRCI
+				result.csr_source=1;
+				result.regData = 2'10;
+				result.reg_write = 1;
+			end
+			default:
+			begin
+				//instr no valid
+			end
+		endcase
 		end
 		default begin
-           assert(0) else $error("could not classify opcode %b into instr type",
+			//instr no valid
+            assert(0) else $error("could not classify opcode %b into instr type",
                                  opcode); 
 		end
 	endcase
