@@ -5,7 +5,7 @@ package Common;
 /*----------VARIABLES----------*/
 
    typedef logic[4:0] regId_t;
-   typedef logic [31:0] uint32_t;
+   typedef logic [31:0] uint32;
    typedef logic signed [31:0] int32_t;
    typedef logic [6:0]  opcode_t;
    typedef logic [31:0] raw_instr_t;
@@ -173,7 +173,7 @@ package Common;
       automatic instr_type_t instr_type = get_instr_type(opcode); //OBTENGO EL TIPO DE INSTRUCCION
       unique case (instr_type)
         instr_type_SB: begin
-           unique case (Instr.funct3)
+           unique case (instr.funct3)
 			//SB (Branch's)
              'b000: return instr_beq;
 			 'b001: return instr_bne;
@@ -184,7 +184,7 @@ package Common;
 			 endcase
 		end
 		instr_type_S: begin
-			unique case (Instr.funct3)
+			unique case (instr.funct3)
 			//S (Store's)
              'b000: return instr_sb;
 			 'b001: return instr_sh;
@@ -194,21 +194,21 @@ package Common;
 		instr_type_I: begin
 		    unique casez ({opcode, instr.funct3, instr.imm[11:5]})
 			//I (Load's)
-             'b0000011_000_xxxxxxx: return instr_lb;
-			 'b0000011_001_xxxxxxx: return instr_lh;
-			 'b0000011_010_xxxxxxx: return instr_lw;
-			 'b0000011_100_xxxxxxx: return instr_lbu;
-			 'b0000011_101_xxxxxxx: return instr_lhu;
+             'b0000011_000_???????: return instr_lb;
+			 'b0000011_001_???????: return instr_lh;
+			 'b0000011_010_???????: return instr_lw;
+			 'b0000011_100_???????: return instr_lbu;
+			 'b0000011_101_???????: return instr_lhu;
 			//I (Arithmetic's)
-			 'b0010011_000_xxxxxxx: return instr_addi;
+			 'b0010011_000_???????: return instr_addi;
 			 'b0010011_001_0000000: return instr_slli;
-			 'b0010011_010_xxxxxxx: return instr_slti;
-			 'b0010011_011_xxxxxxx: return instr_sltiu;
-			 'b0010011_100_xxxxxxx: return instr_xori;
+			 'b0010011_010_???????: return instr_slti;
+			 'b0010011_011_???????: return instr_sltiu;
+			 'b0010011_100_???????: return instr_xori;
 			 'b0010011_101_0000000: return instr_srli;
 			 'b0010011_101_0100000: return instr_srai;
-			 'b0010011_110_xxxxxxx: return instr_ori;
-			 'b0010011_111_xxxxxxx: return instr_andi;
+			 'b0010011_110_???????: return instr_ori;
+			 'b0010011_111_???????: return instr_andi;
            endcase
         end
         instr_type_U, instr_type_UJ: begin
@@ -265,13 +265,13 @@ package Common;
             result = 0;
         end
         instr_type_I: begin
-           result.imm[11:0] = instr[31:21];
+           result.imm[10:0] = instr[31:21];
            result.rs1 = instr[19:15];
            result.funct3 = instr[14:12];
            result.rd = instr[11:7];
         end
         instr_type_U: begin
-           result.imm = instr[31:12];
+           result.imm[19:0] = instr[31:12];
            result.rd = instr[11:7];
         end
         instr_type_R: begin

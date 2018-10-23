@@ -2,9 +2,9 @@ import Common::*;
 
 module ControlMem(
  input [1:0] address,
- input uint32_t dataMemOut,
+ input uint32 dataMemOut,
  input logic [3:0] instType,
- output      uint32_t dataRead,
+ output      uint32 dataRead,
  output logic [3:0] maskByte,
  output logic read,write,exception
  );

@@ -3,9 +3,9 @@ import Common::*;
 
 module ALU
   (input ALU_control_t control,
-   input        uint32_t data1,data2,
+   input        uint32 data1,data2,
    input logic unsig,
-   output       uint32_t result,
+   output       uint32 result,
    output logic is_zero, is_less, is_great
    );
 

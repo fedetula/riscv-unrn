@@ -12,13 +12,13 @@ module Uniciclo(
    int32_t  immediate_val;
 
    Common::control_out_t control_out;
-   uint32_t alu_data1, alu_data2;
-   uint32_t alu_result;
+   uint32 alu_data1, alu_data2;
+   uint32 alu_result;
    logic alu_is_zero,alu_is_less,alu_is_great;
 
-   uint32_t reg_file_write_data;
-   uint32_t reg_file_read_data1;
-   uint32_t reg_file_read_data2;
+   uint32 reg_file_write_data;
+   uint32 reg_file_read_data1;
+   uint32 reg_file_read_data2;
 
 
    ALU alu(.control   (control_out.alu_op),
@@ -29,7 +29,7 @@ module Uniciclo(
 		       .is_less   (alu_is_less)
 		       .is_great  (alu_is_great));
 
-   uint32_t data_mem_out;
+   uint32 data_mem_out;
 
 //A modificar
 /*DataMem data_mem(.clk,
@@ -45,9 +45,9 @@ module Uniciclo(
     /////////////
     // PC
     /////////////
-   uint32_t PC_reg;
-   uint32_t PC_next;
-   uint32_t PC_plus_4;
+   uint32 PC_reg;
+   uint32 PC_next;
+   uint32 PC_plus_4;
 
    assign PC_plus_4 = PC_reg + 4;
 
@@ -88,9 +88,9 @@ module Uniciclo(
    // Register File
    //////////////////
 
-   uint32_t memToReg;
-   uint32_t writeBack;
-   uint32_t mtimeData;
+   uint32 memToReg;
+   uint32 writeBack;
+   uint32 mtimeData;
 
    RegFile reg_file(.clk,
                     .rst,
