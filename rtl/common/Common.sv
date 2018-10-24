@@ -54,7 +54,7 @@ package Common;
 						 instr_andi,
 						 //COMPARE
 						 instr_slt,
-						 instr_slti,	
+						 instr_slti,
 						 instr_sltu,
 						 instr_sltiu,
 						 //BRANCHES
@@ -92,7 +92,7 @@ package Common;
 						 instr_ecall,
 						 instr_ebreak
                          } instr_e;
-				
+
    typedef enum	logic [3:0] {
                          ALU_and = 'b0000,
                          ALU_or  = 'b0001,
@@ -112,7 +112,7 @@ package Common;
 
 
    /*----------ESTRUCTURAS-----------*/
-   
+
    typedef struct packed {
 						  opcode_t opcode;
 						  logic [31:0]      imm;
@@ -122,7 +122,7 @@ package Common;
 						  regId_t rs2;
 						  regId_t rd;
 						} decoded_instr_t;
-						 
+
    typedef struct packed      {
 						  logic             is_branch;
 						  //logic             mem_read;
@@ -137,12 +137,16 @@ package Common;
 						  ALU_control_t     alu_op;
 						  logic [3:0]       instType;
 						  logic             reg_write;
-						  logic				unsign;
+                          logic [1:0] csr_op;
+                          logic mem_from_mtime;
+                          logic excRequest;
+                          uint32 excCause;
+
 						} control_out_t;
-						
-   
+
+
    /*---------FUNCIONES----------*/
-   
+
    function opcode_t get_opcode(raw_instr_t instr);
       return instr[6:0];
    endfunction
@@ -257,7 +261,7 @@ package Common;
    function decoded_instr_t decode_instruction(raw_instr_t instr);
       decoded_instr_t result;
       instr_type_t instr_type;
-      
+
       result.opcode = get_opcode(instr);
       instr_type = get_instr_type(result.opcode);
       case (instr_type)
@@ -309,6 +313,6 @@ package Common;
       endcase
       return result;
    endfunction
-   
-   
+
+
 endpackage
