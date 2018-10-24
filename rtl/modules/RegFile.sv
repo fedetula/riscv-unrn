@@ -21,7 +21,7 @@ always_ff @(posedge clk) begin
    if (rst) begin
       registers  <= '{default:0};
    end 
-   else(write_enable & write_reg != 0) begin
+   else if(write_enable & write_reg != 0) begin
           registers[write_reg] <= write_data;
    end
 end

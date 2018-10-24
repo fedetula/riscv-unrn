@@ -45,11 +45,11 @@ package Control;
 			3'b101: begin
 			result.instType = 4'b1111;
 			end
-			default begin
+			default: begin
 			result.instType = 4'b0000;
-			end
-			default:
-			begin
+			// end
+			// default:
+			// begin
         result.excCause[31] = 0;
         result.excCause[30:0] = 2'h2;
 			end
@@ -283,7 +283,7 @@ package Control;
 			result.alu_op = Common::ALU_cge;
 			end
 			3'b110: begin
-			result.alu_op = Common::ALU_stlu;
+			result.alu_op = Common::ALU_sltu;
 			end
 			3'b111: begin
 			result.alu_op = Common::ALU_cgeu;
@@ -350,7 +350,7 @@ package Control;
 					result.regData = 2'b10;
 					result.reg_write = 0;
           result.excCause[31] = 0;
-          result.excCause[30:0] = 2'd11;
+          result.excCause[30:0] = 31'd11;
 				end
 				3'b001://EBREAK
 				begin

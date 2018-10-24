@@ -99,7 +99,7 @@ package Common;
                          ALU_add = 'b0010,
 						 ALU_cne = 'b0011,
 						 ALU_sll = 'b0100,
-                         ALU_sub = 'b0110,
+             ALU_sub = 'b0110,
 						 ALU_srl = 'b0111,
 						 ALU_sra = 'b1000,
 						 ALU_slt = 'b1001,
