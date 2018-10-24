@@ -1,13 +1,13 @@
 import Common::*;
 
 module DataMem(
- input logic clk, rst, mem_read, mem_write,
- input logic [29:0] address,
- input logic [3:0] maskByte,
- input       uint32 pc,write_data,
- output      uint32 read_data,instruction
- );
-
+               input logic clk,
+               input logic rst,
+               input       MemoryBusCmd membuscmd,
+               output      MemoryBusResult membusres,
+               input       uint32 pc,
+               output      uint32 instruction
+               );
 
 /*-----Dudas-----
 
@@ -27,22 +27,28 @@ module DataMem(
 uint32 writeValue;
 uint32 pc_aux;
 
-assign writeValue = write_data;
+assign writeValue = membuscmd.write_data;
 assign pc_aux = {pc[31:2],2'b00};
-assign address_aux = {address,2'b00};
+assign address_aux = {membuscmd.address,2'b00};
 
 //Instruction
 assign instruction = mem[pc_aux]; //4 byte copy
 
 //Read Data
-assign read_data = mem_read? mem[address_aux] : 32'bx ; //4 byte copy
+   always_comb begin
+      if (membuscmd.mem_read) begin
+         membusres.read_data = mem[address_aux]; //4 byte copy
+      end else begin
+         membusres.read_data =  32'bx ; //4 byte copy
+      end
+   end
 
 //Write Data
 always_ff @(posedge clk, posedge rst) begin
     if (rst) mem <= '{default:0};
     else
-    if (mem_write) begin
-			case(maskByte)
+    if (membuscmd.mem_write) begin
+			case(membuscmd.mask_byte)
   			1:   mem[address_aux][0] <= writeValue[7:0];//1 byte copy
   			2:   mem[address_aux][1] <= writeValue[7:0];//1 byte copy
   			3:   mem[address_aux][1:0] <= writeValue[15:0]; //2 byte copy / debe ser little-endian
@@ -50,7 +56,7 @@ always_ff @(posedge clk, posedge rst) begin
   			6:   mem[address_aux][2:1] <= writeValue[15:0]; //2 byte copy / debe ser little-endian
   			8:   mem[address_aux][3] <= writeValue[7:0];//1 byte copy
   			12:  mem[address_aux][3:2] <= writeValue[15:0]; //2 byte copy / debe ser little-endian
-  			15:  mem[address_aux] <= writeValue[31:0]; //4 byte copy / debe ser little-endian
+  			15: mem[address_aux] <= writeValue[31:0]; //4 byte copy / debe ser little-endian
 			endcase
 		end
 end
