@@ -110,6 +110,15 @@ package Common;
 						 ALU_cgeu = 'b1101,
 						 ALU_ce = 'b1110
                          } ALU_control_t;
+                         
+    typedef enum	logic [2:0] {
+                      PC_PLUS_4 = 'b000,
+                      PC_BRANCH = 'b001,
+                      PC_JUMP = 'b010,
+                      PC_MTVEC = 'b011,
+                      PC_MEPEC = 'b100,
+                      } pc_next_t;
+
 
 
    /*----------ESTRUCTURAS-----------*/
