@@ -1,4 +1,5 @@
 //Falta agregar instrucciones fence y priviliged a la funcion getName, y ver donde mas agregar cosas
+import riscV_unrn_pkg::*;
 
 package Common;
 
@@ -137,11 +138,15 @@ package Common;
 						  ALU_control_t     alu_op;
 						  logic [3:0]       instType;
 						  logic             reg_write;
+              logic             unsign;
                           logic [1:0] csr_op;
                           logic mem_from_mtime;
                           logic excRequest;
+                          logic excRet;
                           uint32 excCause;
-
+                          logic mtimeWe;              // TODO: Check this
+                          logic [1:0] mtimeAddress;   // TODO: Check this
+                          logic [31:0] trapInfo;       // TODO: Check this
 						} control_out_t;
 
 

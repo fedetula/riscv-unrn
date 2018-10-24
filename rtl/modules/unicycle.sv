@@ -44,12 +44,6 @@ module unicycle(
 
    assign PC_plus_4 = PC_reg + 4;
 
-   always_ff @(posedge clk) begin
-     if (rst) PC_reg <= 0;
-     else begin
-       PC_reg <= PC_next;
-     end
-   end
 
    // This is old
    // always_comb begin//Con JUMP y Branch
@@ -69,15 +63,36 @@ module unicycle(
    localparam  PC_MTVEC = 3;
    localparam  PC_MEPC = 4;
 
-   always_comb begin
-     case (control_out.pc_next)
-       PC_PLUS_4: PC_next = PC_plus_4;
-       PC_BRANCH: PC_next = PC_reg + immediate_val;
-       PC_JUMP: PC_next = memToReg;
-       PC_MTVEC: PC_next = mtvec;
-       PC_MEPC: PC_next = mepc;
-       default: PC_next = PC_plus_4;
-     endcase
+   // always_comb begin
+   //   case (control_out.pc_next)
+   //     PC_PLUS_4: PC_next = PC_plus_4;
+   //     PC_BRANCH: PC_next = PC_reg + immediate_val;
+   //     PC_JUMP: PC_next = memToReg;
+   //     PC_MTVEC: PC_next = mtvec;
+   //     PC_MEPC: PC_next = mepc;
+   //     default: PC_next = PC_plus_4;
+   //   endcase
+   // end
+
+   always_comb
+    begin
+      if(control_out.is_branch)
+        PC_next = PC_reg + immediate_val;
+      else if(control_out.is_jump)
+        PC_next = memToReg;
+      else if(control_out.excRequest)
+        PC_next = mtvec;
+      else if(control_out.excRet)
+        PC_next = mepc;
+      else
+        PC_next = PC_plus_4;
+   end
+
+   always_ff @(posedge clk) begin
+     if (rst) PC_reg <= 0;
+     else begin
+       PC_reg <= PC_next;
+     end
    end
 
    ////////////////////////////////////////////
@@ -116,7 +131,7 @@ module unicycle(
                     .read_data2   (reg_file_read_data2));
 
     always_comb begin
-      unique case (control_out.reg_source)
+      unique case (control_out.regData)
         2'b00: reg_file_write_data = memToReg;
         2'b01: reg_file_write_data = PC_plus_4;
         2'b10: reg_file_write_data = csrReadData;
@@ -160,15 +175,15 @@ module unicycle(
    csrUnit csrs(
       .clk(clk),
       .rst(rst),
-     .op_i          (control_out.csrOp),
+     .op_i          (control_out.csr_op),
      .address_i     (decoded_instr.imm[11:0]), // TODO: Check this
      .data_i        (dataToCsr),
      .data_o        (csrReadData),
      .pc_i          (PC_reg),
-     .excRequest_i  (control_out.exc),           // TODO: Check this
-     .excCause_i   (control_out.excCause),      // TODO: Check this
+     .excRequest_i  (control_out.excRequest),
+     .excCause_i    (control_out.excCause),
      .trapInfo_i    (control_out.trapInfo),      // TODO: Check this
-     .exc_o        (exc_to_controler),          // TODO: Check this
+     .exc_o         (exc_to_controler),          // TODO: Check this
      .mtvec_o       (mtvec),
      .mepc_o        (mepc),
      .mtimeData_i   (reg_file_read_data2),

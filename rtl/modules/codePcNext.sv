@@ -10,7 +10,7 @@ always_comb
           pc_next =2'b010;
         else if(excep)
           pc_next =2'b011;
-        else if(reyExc)
+        else if(retExc)
           pc_next =2'b100;
         else
           pc_next =2'b000;

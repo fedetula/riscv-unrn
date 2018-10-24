@@ -129,11 +129,20 @@ package riscV_unrn_pkg;
   ////////////////////////////////
   // Implemented Exception Codes
   ////////////////////////////////
-  localparam  logic [31:0] M_EXT_INT   = (1 << 63) | 11;    // Machine external interrupt
-  localparam  logic [31:0] M_TIMER_INT = (1 << 63) | 7;     // Machine timer interrupt
-  localparam  logic [31:0] M_ILL_INSTR = 2;                 // Illegal instruction
-  localparam  logic [31:0] M_BREAK     = 3;                 // Breakpoint
-  localparam  logic [31:0] M_ECALL     = 11;                // Enviroment call from M-Mode
+  localparam  logic [31:0] M_EXT_INT   = (1 << 31) | 11;    // Machine external interrupt
+  localparam  logic [31:0] M_TIMER_INT = (1 << 31) | 7;     // Machine timer interrupt
+  localparam  logic [31:0] M_INSTR_MISALIGN     = 0;
+  localparam  logic [31:0] M_INSTR_AFAULT       = 1;
+  localparam  logic [31:0] M_ILL_INSTR          = 2;        // Illegal instruction
+  localparam  logic [31:0] M_BREAK              = 3;        // Breakpoint
+  localparam  logic [31:0] M_LOAD_MISALIGN      = 4;
+  localparam  logic [31:0] M_LOAD_AFAULT        = 5;
+  localparam  logic [31:0] M_STORE_MISALIGN     = 6;
+  localparam  logic [31:0] M_STORE_AFAULT       = 7;
+  localparam  logic [31:0] M_ECALL              = 11;       // Enviroment call from M-Mode
+
+
+  localparam  logic [31:0] HARDCODED_MTVEC = 32'h8000_0004;
 
   /////////////////////////
   // Timers address encoding

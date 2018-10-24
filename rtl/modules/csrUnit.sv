@@ -54,9 +54,6 @@ module csrUnit
   assign mtvec_o = mtvec_reg;
   assign mepc_o = mepc_reg;
 
-  // TODO : Verify this section
-  // Check if enabled and pending interrupt match
-  assign exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.meip): 1'b0;
 
   //////////////////////////
   // Implemented Registers
@@ -148,7 +145,9 @@ module csrUnit
                      end
 
         CSR_MTVEC:    begin
-                        mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
+                        //Use only one of this lines: Hardcoded value vs. write data from datapath
+                        //mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
+                        mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
                         mip_next = csrWrite & 32'h080;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts
@@ -184,30 +183,48 @@ module csrUnit
       case (mtimeAddress_i)
         MTIME_LOW:      mtime_next = {mtime_reg[63:32],mtimeData_i};
         MTIME_HIGH:     mtime_next = {mtimeData_i,mtime_reg[31:0]};
-        MTIMECMP_LOW:   mtimecmp_next = {mtimecmp_reg[63:32],mtimeData_i};
-        MTIMECMP_HIGH:  mtimecmp_next = {mtimeData_i,mtimecmp_reg[31:0]};
+        MTIMECMP_LOW:   begin
+                          mtimecmp_next = {mtimecmp_reg[63:32],mtimeData_i};
+                        mip_next.mtip = 0;      // Clear mtime pending interrupt bit when writing to mtimecmp register
+                        end
+        MTIMECMP_HIGH:  begin
+                          mtimecmp_next = {mtimeData_i,mtimecmp_reg[31:0]};
+                          mip_next.mtip = 0;    // Clear mtime pending interrupt bit when writing to mtimecmp register
+                        end
         default: ;
       endcase
     end
 
     ////////////////////////////
-    // Manage exceptions
+    // Timer Exception detect
     ////////////////////////////
-
-    if (excRequest_i & mstatus_reg.mie) begin     //Exception request fromm controller
-      mip_next.meip = mie_next.meie;            // Raise pending exception flag if enabled
-      // mstatus??
-      mepc_next = pc_i;         // Save actual pc
-      mcause_next = excCause_i;  // Register exception cause
-
-      mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
-
+    // Raise mtime pending interrupt bit if interrupt enabled and timer overflowed
+    if (mstatus_reg.mie && mie_reg.mtie) begin
+      if (mtime_reg >= mtimecmp_reg) begin
+        mip_next.mtip = 1;
+      end
     end
 
 
+    //////////////////////////////////////////////////////
+    // Manage exceptions conditions to write to registers that need to be written
+    /////////////////////////////////////////////////////
+
+    if ((excRequest_i || mip_next.mtip) & mstatus_reg.mie) begin   //Exception request fromm controller or timer overflow
+      //mip_next.meip = mie_next.meie;                             // Raise pending exception flag if enabled NOT IMPLEMENTED: WE ARE NOT USING EXTERNAL INTERRUPTS
+      mepc_next = pc_i;                                            // Save actual pc
+      mcause_next = mip_next.mtip ? M_TIMER_INT : excCause_i;      // Register exception cause.
+
+      mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
+    end
 
   end : write_logic
 
+
+
+
+  // Check if enabled and pending interrupt match
+  assign exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.meip): 1'b0;
 
 
   always_ff @ (posedge clk) begin
