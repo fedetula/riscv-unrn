@@ -111,14 +111,12 @@ package Common;
 						 ALU_ce = 'b1110
                          } ALU_control_t;
 
-//Tipo de pc a elegir
-
-typedef enum	logic [2:0] {
+    typedef enum	logic [2:0] {
                       PC_PLUS_4 = 'b000,
                       PC_BRANCH = 'b001,
                       PC_JUMP = 'b010,
                       PC_MTVEC = 'b011,
-                      PC_MEPEC = 'b100,
+                      PC_MEPEC = 'b100
                       } pc_next_t;
 
    /*----------ESTRUCTURAS-----------*/
@@ -142,12 +140,11 @@ typedef enum	logic [2:0] {
 						  logic 			alu_from_pc;
 						  logic 			is_jump;
 						  logic [1:0]       regData;
-						  pc_next_t       pcSource;
+						  pc_next_t      pcSource;
 						  logic 			csr_source;
 						  ALU_control_t     alu_op;
 						  logic [3:0]       instType;
 						  logic             reg_write;
-              logic             unsign;
                           logic [1:0] csr_op;
                           logic mem_from_mtime;
                           logic excRequest;

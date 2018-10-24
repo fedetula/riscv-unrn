@@ -13,16 +13,16 @@ package Control;
 	result.is_jump = instr_name == (Common::instr_jal || Common::instr_jalr);
 
   //Logica para PC_next
-  if(branch)
-    pcSource = PC_BRANCH;
-  else if(jump)
-    pcSource = PC_JUMP;
-  else if(excep)
-    pcSource = PC_MTVEC;
-  else if(retExc)
-    pcSource = PC_MEPEC;
+  if(result.is_branch)
+    pcSource = Common::PC_BRANCH;
+  else if(result.is_jump)
+    pcSource = Common::PC_JUMP;
+  else if(result.excRequest)
+    pcSource = Common::PC_MTVEC;
+  else if(result.excRet)
+    pcSource = Common::PC_MEPEC;
   else
-    pcSource = PC_PLUS_4;
+    pcSource = Common::PC_PLUS_4;
 
 	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write ; unsign
 	case (opcode)
@@ -32,6 +32,7 @@ package Control;
 		//result.pcSource = 2'b00;
 		//result.mem_read = 1;
 		//result.is_jump = 0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source = 0;
@@ -73,6 +74,8 @@ package Control;
 		//result.mem_write = 0;
 		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -90,6 +93,8 @@ package Control;
 		//result.pcSource = 2'b00;
 		//result.is_branch=0;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -144,6 +149,8 @@ package Control;
 		//result.mem_read = 0;
 		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -161,6 +168,8 @@ package Control;
 		//result.is_branch=0;
 		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -170,6 +179,12 @@ package Control;
 		result.alu_from_imm = 1;
 		result.alu_op = Common::ALU_add;
 		result.reg_write = 0;
+
+    if(address > m_base_adress && address <m_sup_limit)
+        result.mtimeWe = 1;
+    else
+        result.mtimeWe = 0;
+
 		case (instr.funct3)
 			3'b000: begin
 			result.instType = 4'b1100;
@@ -193,6 +208,8 @@ package Control;
 		//result.pcSource = 2'b00;
 		//result.is_branch=0;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -254,6 +271,8 @@ package Control;
 		//result.mem_write = 0;
 		//result.is_branch=0;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -272,6 +291,8 @@ package Control;
 		//result.is_branch=1;
 		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -313,6 +334,8 @@ package Control;
 		//result.is_branch=0;
 		//result.pcSource = 2'b10;
 		//result.is_jump = 1;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -330,6 +353,8 @@ package Control;
 		//result.pcSource = 2'b10;
 		//result.is_branch=0;
 		//result.is_jump = 1;
+    result.mem_from_mtime = 1'b0;
+    result.excRet = 1'b0;
     result.excRequest = 0;
     result.csr_op = 2'h0;
 		result.csr_source=0;
@@ -347,6 +372,7 @@ package Control;
 		//result.is_branch=0;
 		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
+    result.mem_from_mtime = 1'b0;
 		result.alu_from_pc = 0;
 		result.instType = 4'b0000;
 		result.alu_op = Common::ALU_add;
@@ -357,6 +383,7 @@ package Control;
 				case(instr.imm[2:0])
 				3'b000://ECALL
 				begin
+          result.excRet = 1'b0;
           result.excRequest = 1;
 					result.csr_source=0;
 					result.regData = 2'b10;
@@ -366,12 +393,14 @@ package Control;
 				end
 				3'b001://EBREAK
 				begin
+          result.excRet = 1'b0;
           result.excRequest = 1;
 					result.csr_source=0;
 					result.regData = 2'b10;
 					result.reg_write = 0;
           result.excCause[31] = 0;
           result.excCause[30:0] = 2'h3;
+          result.excRet = 1'b0;
 				end
 				3'b010://MRET
 				begin
@@ -379,6 +408,7 @@ package Control;
 					result.regData = 2'b10;
 					result.reg_write = 0;
           result.csr_op = 2'h0;
+          result.excRet = 1'b1;
 				end
 				3'b101://WFI
 				begin
@@ -386,9 +416,11 @@ package Control;
 					result.regData = 2'b10;
 					result.reg_write = 0;
           result.csr_op = 2'h0;
+          result.excRet = 1'b0;
 				end
 				default:
 				begin
+          result.excRet = 1'b0;
           result.excCause[31] = 0;
           result.excCause[30:0] = 2'h2;
 				end
@@ -396,56 +428,70 @@ package Control;
 			end
 			3'b001: begin
 			//CSRRW
+      result.excRet = 1'b0;
 				result.csr_source=0;
 				result.regData = 2'b10;
 				result.reg_write = 1;
         result.csr_op = 2'h1;
+        result.excRet = 1'b0;
 			end
 			3'b010: begin
 			//CSRRS
+        result.excRet = 1'b0;
 				result.csr_source=0;
 				result.regData = 2'b10;
 				result.reg_write = 1;
         result.csr_op = 2'h2;
+        result.excRet = 1'b0;
 			end
 			3'b011: begin
 			//CSRRC
+        result.excRet = 1'b0;
 				result.csr_source=0;
 				result.regData = 2'b10;
 				result.reg_write = 1;
         result.csr_op = 2'h3;
+        result.excRet = 1'b0;
 			end
 			3'b101: begin
 			//CSRRWI
+        result.excRet = 1'b0;
 				result.csr_source=1;
 				result.regData = 2'b10;
 				result.reg_write = 1;
         result.csr_op = 2'h1;
+        result.excRet = 1'b0;
 			end
 			3'b110: begin
 			//CSRRSI
+        result.excRet = 1'b0;
 				result.csr_source=1;
 				result.regData = 2'b10;
 				result.reg_write = 1;
         result.csr_op = 2'h2;
+        result.excRet = 1'b0;
 			end
 			3'b111: begin
 			//CSRRCI
+        result.excRet = 1'b0;
 				result.csr_source=1;
 				result.regData = 2'b10;
 				result.reg_write = 1;
         result.csr_op = 2'h3;
+        result.excRet = 1'b0;
 			end
 			default:
 			begin
         result.excCause[31] = 0;
         result.excCause[30:0] = 2'h2;
+        result.excRet = 1'b0;
 			end
 		endcase
 		end
 		default begin
       result.excCause[31] = 0;
       result.excCause[30:0] = 2'h2;
+      result.excRet = 1'b0;
             assert(0) else $error("could not classify opcode %b into instr type",
                                  opcode);
 		end
