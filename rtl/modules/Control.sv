@@ -1,7 +1,7 @@
 import Common::*;
 
 package Control;
-   function Common::control_out_t control_from_instruction(Common::decoded_instr_t instr); // "instr" tiene que pasar como parametro. Antes debe ejecutar la funcion decode_instruction
+   function Common::control_out_t control_from_instruction(Common::decoded_instr_t instr, input logic doBranch); // "instr" tiene que pasar como parametro. Antes debe ejecutar la funcion decode_instruction
       automatic Common::control_out_t result = 0;
 	  automatic Common::opcode_t opcode = Common::get_opcode(instr);
 	  automatic Common::instr_e instr_name = Common::get_instruction_name(instr);
@@ -13,7 +13,7 @@ package Control;
 	result.is_jump = instr_name == (Common::instr_jal || Common::instr_jalr);
 
   //Logica para PC_next
-  if(result.is_branch)
+  if(doBranch)//Señal
     pcSource = Common::PC_BRANCH;
   else if(result.is_jump)
     pcSource = Common::PC_JUMP;

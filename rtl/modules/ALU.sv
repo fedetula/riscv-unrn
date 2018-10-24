@@ -4,14 +4,8 @@ import Common::*;
 module ALU
   (input ALU_control_t control,
    input        uint32 data1,data2,
-   input logic unsig,
-   output       uint32 result,
-   output logic is_zero, is_less, is_great
+   output       uint32 result
    );
-
-   assign is_zero = result == 0;
-   assign is_less = (result <0) ? 1 : 0;
-   assign is_greater = (result >= 0) ? 1 : 0;
 
    always_comb begin//Alu solo op de and,or,xor,add,sub,sll,srl,sra los compare se pueden hacer mediante sub y con flag, ver que conviene
       case (control)
@@ -52,10 +46,10 @@ module ALU
            result = ($unsigned(data1) < $unsigned(data2)) ? 32'b1 : 32'b0;
         end
 		ALU_cge: begin
-		   result = ($signed(data1) >= $signed(data2)) ? 32'b1 : 32'b0;	
+		   result = ($signed(data1) >= $signed(data2)) ? 32'b1 : 32'b0;
 		end
 		ALU_cgeu: begin
-		   result = data1 >= data2 ? 32'b1 : 32'b0;	
+		   result = data1 >= data2 ? 32'b1 : 32'b0;
 		end
         default: begin
           result = 0; // avoid latch.
