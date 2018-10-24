@@ -12,6 +12,18 @@ package Control;
 	//is_jump (la linea 13 la deje comentada como opcion 2. Capaz reduce recursos)
 	result.is_jump = instr_name == (Common::instr_jal || Common::instr_jalr);
 
+  //Logica para PC_next
+  if(branch)
+    pcSource = PC_BRANCH;
+  else if(jump)
+    pcSource = PC_JUMP;
+  else if(excep)
+    pcSource = PC_MTVEC;
+  else if(retExc)
+    pcSource = PC_MEPEC;
+  else
+    pcSource = PC_PLUS_4;
+
 	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write ; unsign
 	case (opcode)
 		7'b0000011: begin//LOAD'S
