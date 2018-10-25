@@ -23,7 +23,7 @@ module csrUnit
   // Timers
   input logic [31:0] mtimeData_i,
   input logic mtimeWe_i,
-  input mtime_address_t mtimeAddress_i,
+  input logic [31:0] mtimeAddress_i,
   output logic [31:0] mtimeData_o
 
   );
@@ -96,10 +96,10 @@ module csrUnit
 
   // Timer Registers
       case (mtimeAddress_i)
-        MTIME_LOW:      mtimeData_o = mtime_reg[31:0];
-        MTIME_HIGH:     mtimeData_o = mtime_reg[63:32];
-        MTIMECMP_LOW:   mtimeData_o = mtimecmp_reg[31:0];
-        MTIMECMP_HIGH:  mtimeData_o = mtimecmp_reg[63:32];
+        MTIME_ADDRESS_LOW:      mtimeData_o = mtime_reg[31:0];
+        MTIME_ADDRESS_HIGH:     mtimeData_o = mtime_reg[63:32];
+        MTIMECMP_ADDRESS_LOW:   mtimeData_o = mtimecmp_reg[31:0];
+        MTIMECMP_ADDRESS_HIGH:  mtimeData_o = mtimecmp_reg[63:32];
         default: ;
       endcase
 

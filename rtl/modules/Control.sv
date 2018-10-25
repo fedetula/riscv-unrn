@@ -156,46 +156,39 @@ package Control;
 		result.instType = 4'b0000;
 		end
 		7'b0100011: begin//STORE'S
-		//result.mem_read = 0;
-		//result.mem_write = 1;
-		//result.is_branch=0;
-		//result.is_jump = 0;
-    result.mem_from_mtime = 1'b0;
-    result.excRet = 1'b0;
-    result.excRequest = 0;
-    result.csr_op = 2'h0;
-		result.csr_source=0;
-		result.regData = 2'b00;
-		result.alu_from_pc = 0;
-		result.mem_to_reg = 0;
-		result.alu_from_imm = 1;
-		result.alu_op = Common::ALU_add;
-		result.reg_write = 0;
+        		//result.mem_read = 0;
+        		//result.mem_write = 1;
+        		//result.is_branch=0;
+        		//result.is_jump = 0;
+            result.mem_from_mtime = 1'b0;
+            result.excRet = 1'b0;
+            result.excRequest = 0;
+            result.csr_op = 2'h0;
+        		result.csr_source=0;
+        		result.regData = 2'b00;
+        		result.alu_from_pc = 0;
+        		result.mem_to_reg = 0;
+        		result.alu_from_imm = 1;
+        		result.alu_op = Common::ALU_add;
+        		result.reg_write = 0;
 
-    //If is aggregate to the bus, this is innecessary
-    if(address > m_base_adress && address <m_sup_limit)
-        result.mtimeWe = 1;
-    else
-        result.mtimeWe = 0;
-    //
-
-		case (instr.funct3)
-			3'b000: begin
-			result.instType = 4'b1100;
-			end
-			3'b001: begin
-			result.instType = 4'b1101;
-			end
-			3'b010: begin
-			result.instType = 4'b1110;
-			end
-			default: begin
-			result.instType = 4'b0000;
-      result.excCause[31] = 0;
-      result.excCause[30:0] = 2'h2;
-			end
-		endcase
-		end
+            case (instr.funct3)
+              3'b000: begin
+                result.instType = 4'b1100;
+              end
+              3'b001: begin
+                result.instType = 4'b1101;
+              end
+              3'b010: begin
+                result.instType = 4'b1110;
+              end
+              default: begin
+                result.instType = 4'b0000;
+                result.excCause[31] = 0;
+                result.excCause[30:0] = 2'h2;
+              end
+            endcase
+          end
 		7'b0110011: begin//ARITHMETIC
 		//result.mem_read = 0;
 		//result.mem_write = 0;

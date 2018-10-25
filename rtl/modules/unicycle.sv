@@ -157,12 +157,36 @@ module unicycle(
    // To/From Memory
    ////////////////////
 
+   logic mtimeWe;
+   logic mem_from_mtime;
+
    assign pc_o = PC_reg;
 
    assign dataAddress_o = alu_result;
    assign writeData_o = reg_file_read_data2;
 
-   assign data_mem_out = (control_out.mem_from_mtime) ?  mtimeData : readData_i;
+   // Check if we are accessing mtime or mtimemcmp registers
+   always_comb begin
+     instType_o = control_out.instType;
+     case (dataAddress_o)
+       MTIME_MEM_ADDRESS_LOW,
+       MTIME_MEM_ADDRESS_HIGH
+       MTIMECMP_MEM_ADDRESS_LOW,
+       MTIME_MEM_ADDRESS_LOW:
+                  begin         // If we actually are:
+                     // Write to registers if on store
+                     mtimeWe = control_out.instType[2] && (control_out.instType[1:0] != 2'b11);
+                     instType_o = 4'b0000;        // Invalidate access to memory
+                     mem_from_mtime = 1;   // Data comes from registes if on load
+                  end
+       default: begin
+                 mtimeWe = 0;
+                 mem_from_mtime = 0;
+                end
+    endcase
+  end
+
+   assign data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i;
 
    ////////////////////
    // CSRs
@@ -186,8 +210,8 @@ module unicycle(
      .mtvec_o       (mtvec),
      .mepc_o        (mepc),
      .mtimeData_i   (reg_file_read_data2),
-     .mtimeWe_i     (control_out.mtimeWe),      //TODO: Check this
-     .mtimeAddress_i(control_out.mtimeAddress), //TOdO: Check this
+     .mtimeWe_i     (mtimeWe),
+     .mtimeAddress_i(alu_result),               //TODO: Check this
      .mtimeData_o   (mtimeData)
      );
 

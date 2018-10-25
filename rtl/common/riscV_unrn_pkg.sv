@@ -147,12 +147,17 @@ package riscV_unrn_pkg;
   /////////////////////////
   // Timers address encoding
   ////////////////////////
+  localparam  logic [31:0] MTIME_MEM_ADDRESS_LOW = 32'h0000_8004;
+  localparam  logic [31:0] MTIME_MEM_ADDRESS_HIGH = 32'h0000_8008;
+  localparam  logic [31:0] MTIMECMP_MEM_ADDRESS_LOW = 32'h0000_800C;
+  localparam  logic [31:0] MTIMECMP_MEM_ADDRESS_HIGH = 32'h0000_8010;
+
   typedef enum logic [1:0]{
     MTIME_LOW,
     MTIME_HIGH,
     MTIMECMP_LOW,
     MTIMECMP_HIGH
-  }mtime_address_t;
+  }mtime_address_t; //This are addresses internal to CSR unit
    //
    // typedef logic[4:0] regId_t;
    // typedef logic [63:0] uint64_t;
