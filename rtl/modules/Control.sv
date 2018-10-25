@@ -17,19 +17,18 @@ package Control;
     pcSource = Common::PC_BRANCH;
   else if(result.is_jump)
     pcSource = Common::PC_JUMP;
-  else if(result.excRequest)
+  else if(result.excRequest)//&& excepTaken) <--- External Signal
     pcSource = Common::PC_MTVEC;
   else if(result.excRet)
     pcSource = Common::PC_MEPEC;
   else
     pcSource = Common::PC_PLUS_4;
 
-	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write ; unsign
+	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write
 	case (opcode)
 		7'b0000011: begin//LOAD'S
 		//result.is_branch=0;
 		//result.mem_write = 0;
-		//result.pcSource = 2'b00;
 		//result.mem_read = 1;
 		//result.is_jump = 0;
     result.excRet = 1'b0;
@@ -59,20 +58,16 @@ package Control;
 			result.instType = 4'b1111;
 			end
 			default: begin
-			result.instType = 4'b0000;
-			// end
-			// default:
-			// begin
+			  result.instType = 4'b0000;
         result.excCause[31] = 0;
         result.excCause[30:0] = 2'h2;
 			end
 		endcase
 		end
-		7'b0001111: begin //NO TENEMOS DEFINIDO EN EL EXCEL LOS VALORES PARA ESTE OPCODE, ES UN FENCE/FENCEI
+		7'b0001111: begin //FENCE/FENCEI implemened like a NOP
 		//result.is_branch=0;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
-		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
     result.excRet = 1'b0;
@@ -90,7 +85,6 @@ package Control;
 		7'b0010011: begin//ARITHMETIC INM
 		//result.mem_read = 0;
 		//result.mem_write = 0;
-		//result.pcSource = 2'b00;
 		//result.is_branch=0;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
@@ -147,7 +141,6 @@ package Control;
 		//result.mem_write = 0;
 		//result.is_branch=0;
 		//result.mem_read = 0;
-		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
     result.excRet = 1'b0;
@@ -166,7 +159,6 @@ package Control;
 		//result.mem_read = 0;
 		//result.mem_write = 1;
 		//result.is_branch=0;
-		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
     result.excRet = 1'b0;
@@ -180,10 +172,12 @@ package Control;
 		result.alu_op = Common::ALU_add;
 		result.reg_write = 0;
 
+    //If is aggregate to the bus, this is innecessary
     if(address > m_base_adress && address <m_sup_limit)
         result.mtimeWe = 1;
     else
         result.mtimeWe = 0;
+    //
 
 		case (instr.funct3)
 			3'b000: begin
@@ -205,7 +199,6 @@ package Control;
 		7'b0110011: begin//ARITHMETIC
 		//result.mem_read = 0;
 		//result.mem_write = 0;
-		//result.pcSource = 2'b00;
 		//result.is_branch=0;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
@@ -266,7 +259,6 @@ package Control;
 		endcase
 		end
 		7'b0110111: begin//LOAD INM
-		//result.pcSource = 2'b00;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
 		//result.is_branch=0;
@@ -289,7 +281,6 @@ package Control;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
 		//result.is_branch=1;
-		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
     result.excRet = 1'b0;
@@ -332,7 +323,6 @@ package Control;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
 		//result.is_branch=0;
-		//result.pcSource = 2'b10;
 		//result.is_jump = 1;
     result.mem_from_mtime = 1'b0;
     result.excRet = 1'b0;
@@ -350,7 +340,6 @@ package Control;
 		7'b1101111: begin//JAL
 		//result.mem_read = 0;
 		//result.mem_write = 0;
-		//result.pcSource = 2'b10;
 		//result.is_branch=0;
 		//result.is_jump = 1;
     result.mem_from_mtime = 1'b0;
@@ -370,7 +359,6 @@ package Control;
 		//result.mem_read = 0;
 		//result.mem_write = 0;
 		//result.is_branch=0;
-		//result.pcSource = 2'b00;
 		//result.is_jump = 0;
     result.mem_from_mtime = 1'b0;
 		result.alu_from_pc = 0;
