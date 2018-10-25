@@ -133,30 +133,25 @@ package Common;
 						  regId_t rd;
 						} decoded_instr_t;
 
-   typedef struct packed      {
-						  logic             is_branch;
-						  //logic             mem_read;
-						  //logic             mem_write;
-						  logic             mem_to_reg;
-						  logic             alu_from_imm;
-						  logic 			alu_from_pc;
-						  logic 			is_jump;
-						  logic [1:0]       regData;
-						  logic [1:0]       pcSource;
-						  logic 			csr_source;
-						  ALU_control_t     alu_op;
-						  logic [3:0]       instType;
-						  logic             reg_write;
-              logic             unsign;
-                          logic [1:0] csr_op;
-                          logic mem_from_mtime;
-                          logic excRequest;
-                          logic excRet;
-                          uint32 excCause;
-                          logic mtimeWe;              // TODO: Check this
-                          logic [1:0] mtimeAddress;   // TODO: Check this
-                          logic [31:0] trapInfo;       // TODO: Check this
-						} control_out_t;
+   typedef struct     {
+      logic             is_branch;
+      logic             mem_to_reg;
+      logic             alu_from_imm;
+      logic 			      alu_from_pc;
+      logic 			      is_jump;
+      logic [1:0]       regData;
+      logic [1:0]       pcSource;
+      logic 			      csr_source;
+      ALU_control_t     alu_op;
+      logic [3:0]       instType;
+      logic             reg_write;
+      logic             unsign;
+      logic [1:0]       csr_op;
+      logic             mem_from_mtime;
+      logic             excRequest;
+      logic             excRet;
+      uint32            excCause;
+	  } control_out_t;
 
 
    /*---------FUNCIONES----------*/

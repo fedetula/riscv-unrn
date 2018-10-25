@@ -220,11 +220,8 @@ module csrUnit
 
   end : write_logic
 
-
-
-
   // Check if enabled and pending interrupt match
-  assign exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.meip): 1'b0;
+  assign exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.mtip): 1'b0;
 
 
   always_ff @ (posedge clk) begin
