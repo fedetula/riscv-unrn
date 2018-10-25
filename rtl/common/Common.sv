@@ -116,7 +116,7 @@ package Common;
                       PC_BRANCH = 'b001,
                       PC_JUMP = 'b010,
                       PC_MTVEC = 'b011,
-                      PC_MEPEC = 'b100,
+                      PC_MEPEC = 'b100
                       } pc_next_t;
 
 
