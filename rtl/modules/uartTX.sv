@@ -15,39 +15,75 @@ module uartTX
 uint8 data_aux;
 logic [9:0] shift_register;
 logic [3:0] counter;
-logig load;
+logic load;
+typed enum {idle,start,send} state_t;
+state_t reg_state, next_state;
+
 
 always_ff @(posedge clk) begin
-  if(rst) begin
-    data_aux<=0;
-    load<=0;
-  end
-  else if(e_bus) begin
-    data_aux<=data;
-    load<=1;
-  end
-end
-
-always_ff @(posedge clk) begin
-  if(rst) begin
-    shift_register <= 10'b11_1111_1111;
-    busy<=0;
-    counter<=0;
-  end
-  else if(load) begin
-    shift_register <= {data_aux,2'b10};
-    counter
-    load<=0;
-  end
-  else if(!e_bus && baud_rate) begin
-    shift_register <= {1'b1,shift_register[9:1]};
-    counter <= counter + 1;
-    if(counter==10)begin
-      busy<=0;
-      counter<=0;
+     if (rst) begin
+		reg_state<= idle;
     end
     else begin
-      busy<=1
-    end
-  end
+		reg_state <= next_state;
+	end
 end
+
+always_comb begin
+  next_state = state; 
+  load = 0;
+  case (reg_state)
+  
+    idle: begin
+    busy = 0;
+		if (e_bus) begin
+			next_state = start;
+			busy = 1;
+		end
+	end
+	
+    start: begin
+      load = 1;
+      busy = 1;
+      next_state = send;
+    end
+
+    send: begin
+      busy = 1;
+      if (counter == 10)
+        next_state = idle;
+    end
+	
+    default: begin
+      busy = 1;
+	end
+  endcase
+end
+
+always_ff @(posedge clk) begin
+	 TX_transmit <= shift_register[0];
+	if(reg_state==idle) begin
+		if(e_bus) begin
+			data_aux<=data;
+		end
+		else begin
+			data_aux<=0;
+		end
+	end
+end
+
+always_ff @(posedge clk) begin
+	if(rst) begin
+		shift_register <= 10'b11_1111_1111;
+		counter <= 0;
+	end
+	else if (load) begin
+		shift_register <= {data_aux,2'b01};
+		counter <= 0;
+	end
+	else if (!load&& baud_rate) begin
+		shift_register <= {1'b1, shift_register[9:1]};
+		counter <= counter + 1;
+	end
+end
+
