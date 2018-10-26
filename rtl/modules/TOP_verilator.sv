@@ -1,4 +1,5 @@
 import Common::*;
+import MemoryBus::*;
 
 module TOP_verilator(
                      input logic        clk,
@@ -15,18 +16,18 @@ module TOP_verilator(
 
    logic                                invalid_bus_address;
 
-   MemoryBusCmd cpu_bus_cmd = '{default:0};
-   MemoryBusResult cpu_bus_result;
-   MemoryBusCmd probe_bus_cmd;
-   MemoryBusResult probe_bus_result;
-   MemoryBusCmd memory_bus_cmd;
-   MemoryBusResult memory_bus_result;
+   MemoryBus::Cmd cpu_bus_cmd;
+   MemoryBus::Result cpu_bus_result;
+   MemoryBus::Cmd probe_bus_cmd;
+   MemoryBus::Result probe_bus_result;
+   MemoryBus::Cmd memory_bus_cmd;
+   MemoryBus::Result memory_bus_result;
 
-   MemoryBusCmd data_bus_cmd;
-   MemoryBusResult data_bus_result;
+   MemoryBus::Cmd data_bus_cmd;
+   MemoryBus::Result data_bus_result;
 
-   MemoryBusCmd uart_bus_cmd;
-   MemoryBusResult uart_bus_result = '{default:0};
+   MemoryBus::Cmd uart_bus_cmd;
+   MemoryBus::Result uart_bus_result;
 
    assign probe_bus_cmd.address = probe_address;
    assign probe_bus_cmd.mem_read = probe_mem_read;
@@ -36,7 +37,8 @@ module TOP_verilator(
    assign probe_read_data = probe_bus_result.read_data;
 
 
-   MasterBusMux #(.TCmd(MemoryBusCmd), .TResult(MemoryBusResult))
+   MasterBusMux #(.TCmd(MemoryBus::Cmd),
+                  .TResult(MemoryBus::Result))
    master_bus(.useA(probe_mem),
               .busACmd(probe_bus_cmd),
               .busAResult(probe_bus_result),
@@ -46,8 +48,8 @@ module TOP_verilator(
               .busCommonResult(memory_bus_result)
               );
 
-   SlaveBusMux #(.TCmd(MemoryBusCmd),
-                 .TResult(MemoryBusResult),
+   SlaveBusMux #(.TCmd(MemoryBus::Cmd),
+                 .TResult(MemoryBus::Result),
                  .Base1(0),
                  .Size1(2**10),
                  .Base2('h800),
@@ -68,5 +70,7 @@ module TOP_verilator(
                     .membuscmd(data_bus_cmd),
                     .membusres(data_bus_result),
                     .pc, .instruction);
+
+   unicycle unicycle(.clk, .rst(rst_cpu));
 
 endmodule; // TOP_verilator

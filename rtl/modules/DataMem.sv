@@ -1,10 +1,11 @@
 import Common::*;
+import MemoryBus::*;
 
 module DataMem(
                input logic clk,
                input logic rst,
-               input       MemoryBusCmd membuscmd,
-               output      MemoryBusResult membusres,
+               input       MemoryBus::Cmd membuscmd,
+               output      MemoryBus::Result membusres,
                input       uint32 pc,
                output      uint32 instruction
                );

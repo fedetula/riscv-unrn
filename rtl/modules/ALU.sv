@@ -43,7 +43,7 @@ module ALU
            result = ($signed(data1) < $signed(data2)) ? 32'b1 : 32'b0;
         end
 		ALU_sltu: begin
-           result = ($unsigned((data1) < $unsigned(data2)) ? 32'b1 : 32'b0;
+           result = ($unsigned(data1) < $unsigned(data2)) ? 32'b1 : 32'b0;
         end
 		ALU_cge: begin
 		   result = ($signed(data1) >= $signed(data2)) ? 32'b1 : 32'b0;
