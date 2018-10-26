@@ -24,18 +24,17 @@ module DataMem(
 
 //Variables
 uint32 writeValue;
-uint32 pc_aux;
+logic [29:0] pc_aux;
 
 assign writeValue = membuscmd.write_data;
-assign pc_aux = {pc[31:2],2'b00};
 
 //Instruction
-assign instruction = mem[pc_aux]; //4 byte copy
+assign instruction = mem[pc[31:2]]; //4 byte copy
 
 //Read Data
    always_comb begin
       if (membuscmd.mem_read) begin
-         membusres.read_data = mem[address_aux]; //4 byte copy
+         membusres.read_data = mem[membuscmd.address]; //4 byte copy
       end else begin
          membusres.read_data =  32'bx ; //4 byte copy
       end
