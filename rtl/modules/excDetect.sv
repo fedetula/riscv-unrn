@@ -56,6 +56,9 @@ assign  trapInfo_o = trapInfo;
       excCause  = privCause_i;
       trapInfo = pc_i;
     end
+
+    // TODO: Add mtime interrupt check
+
     // Misaligned memory access
     else  begin
       case (dataAddress_i[1:0])

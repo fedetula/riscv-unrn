@@ -96,10 +96,10 @@ module csrUnit
 
   // Timer Registers
       case (mtimeAddress_i)
-        MTIME_ADDRESS_LOW:      mtimeData_o = mtime_reg[31:0];
-        MTIME_ADDRESS_HIGH:     mtimeData_o = mtime_reg[63:32];
-        MTIMECMP_ADDRESS_LOW:   mtimeData_o = mtimecmp_reg[31:0];
-        MTIMECMP_ADDRESS_HIGH:  mtimeData_o = mtimecmp_reg[63:32];
+        MTIME_MEM_ADDRESS_LOW:      mtimeData_o = mtime_reg[31:0];
+        MTIME_MEM_ADDRESS_HIGH:     mtimeData_o = mtime_reg[63:32];
+        MTIMECMP_MEM_ADDRESS_LOW:   mtimeData_o = mtimecmp_reg[31:0];
+        MTIMECMP_MEM_ADDRESS_HIGH:  mtimeData_o = mtimecmp_reg[63:32];
         default: ;
       endcase
 
