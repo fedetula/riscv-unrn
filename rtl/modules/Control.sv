@@ -34,6 +34,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.mem_read = 1;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.excRet = 1'b0;
           result.excRequest = 0;
           result.csr_op = 2'h0;
@@ -61,6 +63,7 @@ package Control;
       			result.instType = MEM_LHU;
       			end
       			default: begin
+              result.inst_invalid = 1;
       			  result.instType = MEM_NOP;
               result.excCause[31] = 0;
               result.excCause[30:0] = 2'h2;
@@ -72,6 +75,8 @@ package Control;
       		//result.mem_read = 0;
       		//result.mem_write = 0;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -90,6 +95,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.is_branch=0;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -135,6 +142,7 @@ package Control;
       			end
       			default:
       			begin
+              result.inst_invalid = 1;
               result.excCause[31] = 0;
               result.excCause[30:0] = 2'h2;
       			end
@@ -145,6 +153,8 @@ package Control;
       		//result.is_branch=0;
       		//result.mem_read = 0;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -163,6 +173,8 @@ package Control;
         		//result.mem_write = 1;
         		//result.is_branch=0;
         		//result.is_jump = 0;
+            result.inst_priv = 0;
+            result.inst_invalid = 0;
             result.mem_from_mtime = 1'b0;
             result.excRet = 1'b0;
             result.excRequest = 0;
@@ -186,6 +198,7 @@ package Control;
                 result.instType = MEM_SW;
               end
               default: begin
+                result.inst_invalid = 1;
                 result.instType = MEM_NOP;
                 result.excCause[31] = 0;
                 result.excCause[30:0] = 2'h2;
@@ -197,6 +210,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.is_branch=0;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -249,6 +264,7 @@ package Control;
       			end
       			default:
       			begin
+              result.inst_invalid = 1;
               result.excCause[31] = 0;
               result.excCause[30:0] = 2'h2;
       			end
@@ -259,6 +275,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.is_branch=0;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -271,13 +289,14 @@ package Control;
       		result.alu_from_imm = 1;
       		result.alu_op = Common::ALU_add;
       		result.reg_write = 1;
-      		result.unsign=0;
       		end
   7'b1100011: begin//BRANCH'S
       		//result.mem_read = 0;
       		//result.mem_write = 0;
       		//result.is_branch=1;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -310,6 +329,7 @@ package Control;
       			end
       			default:
       			begin
+              result.inst_invalid = 1;
               result.excCause[31] = 0;
               result.excCause[30:0] = 2'h2;
       			end
@@ -320,6 +340,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.is_branch=0;
       		//result.is_jump = 1;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -338,6 +360,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.is_branch=0;
       		//result.is_jump = 1;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
           result.excRet = 1'b0;
           result.excRequest = 0;
@@ -356,6 +380,8 @@ package Control;
       		//result.mem_write = 0;
       		//result.is_branch=0;
       		//result.is_jump = 0;
+          result.inst_priv = 0;
+          result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
       		result.alu_from_pc = 0;
       		result.instType = MEM_NOP;
@@ -367,6 +393,7 @@ package Control;
       				case(instr.imm[2:0])
       				3'b000://ECALL
       				begin
+                result.inst_priv = 1;
                 result.excRet = 1'b0;
                 result.excRequest = 1;
       					result.csr_source=0;
@@ -377,6 +404,7 @@ package Control;
       				end
       				3'b001://EBREAK
       				begin
+                result.inst_priv = 1;
                 result.excRet = 1'b0;
                 result.excRequest = 1;
       					result.csr_source=0;
@@ -404,6 +432,7 @@ package Control;
       				end
       				default:
       				begin
+                result.inst_invalid = 1;
                 result.excRet = 1'b0;
                 result.excCause[31] = 0;
                 result.excCause[30:0] = 2'h2;
@@ -466,6 +495,7 @@ package Control;
       			end
       			default:
       			begin
+              result.inst_invalid = 1;
               result.excCause[31] = 0;
               result.excCause[30:0] = 2'h2;
               result.excRet = 1'b0;
@@ -473,6 +503,7 @@ package Control;
       		endcase
       		end
 		default begin
+          result.inst_invalid = 1;
           result.excCause[31] = 0;
           result.excCause[30:0] = 2'h2;
           result.excRet = 1'b0;

@@ -92,7 +92,7 @@ module unicycle(
    assign memToReg = control_out.mem_to_reg ? data_mem_out : alu_result;
 
    RegFile reg_file(.clk(clk),
-                    .rst(clk),
+                    .rst(rst),
                     .read_reg1    (decoded_instr.rs1),
                     .read_reg2    (decoded_instr.rs2),
                     .write_reg    (decoded_instr.rd),
@@ -173,8 +173,8 @@ module unicycle(
      .data_o        (csrReadData),
      .pc_i          (PC_reg),
      .excRequest_i  (control_out.excRequest),
-     .excCause_i    (control_out.excCause),
-     .trapInfo_i    (control_out.trapInfo),      // TODO: Check this
+     .excCause_i    (excCause_i),
+     .trapInfo_i    (trapInfo_i),      // TODO: Check this
      .exc_o         (exc_to_controler),          // TODO: Check this
      .mtvec_o       (mtvec),
      .mepc_o        (mepc),
@@ -187,18 +187,22 @@ module unicycle(
      ////////////////////
      // excDetect
      ////////////////////
+     logic [31:0] trapInfo_i;
+     logic [31:0] excCause_i;
 
+     //Todavia no terminado revisar luego de finalizado las conexiones
      excDetect excDetect(
      //inputs
      .pc_i(pc_o),
-     .dataAddress_i(),
-     .memInstType_i(),
-     .opcode_i(decoded_instr.opcode),
-     .priv_i(),
-     .privCause_i(),
-     //Outs
-     .excCause_o(),
-     .trapInfo_o(),
+     .dataAddress_i(alu_result),
+     .memInstType_i(control_out.instType),
+     .opcode_i(),
+     //.invalid_i(control_out.inst_invalid),
+     .priv_i(control_out.inst_priv),
+     .privCause_i(control_out.excCause),
+     //Outputs
+     .excCause_o(excCause_i),
+     .trapInfo_o(trapInfo_i),
      .excPresent_o(exceptionPresent)
      );
 
