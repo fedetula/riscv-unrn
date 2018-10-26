@@ -72,8 +72,6 @@ package Common;
 						 instr_fence,
 						 instr_fence_i,
 						 //SYSTEM
-						 instr_scall,		//ESTA CREO QUE PUEDE ELIMINARSE
-						 instr_sbreak,		//ESTA CREO QUE PUEDE ELIMINARSE
 						 //COUNTERS
 						 instr_rdcycle,
 						 instr_rdcycleh,

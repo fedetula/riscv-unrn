@@ -21,6 +21,7 @@ module unicycle(
    uint32 alu_data1, alu_data2;                   // ALU Operands
    uint32 alu_result;                             // ALU output
    logic doBranch;                                //Result Branch
+   logic exceptionPresent;  //Falta instanciar excDetect señal para eso
 
    // Register file in/out data
    uint32 reg_file_write_data;
@@ -45,25 +46,7 @@ module unicycle(
    assign doBranch = control_out.is_branch & alu_result[0];
 
 
-   // This is old
-   // always_comb begin//Con JUMP y Branch
-   //   if (control_out.is_branch & alu_result[0])
-   //      PC_next = PC_reg + immediate_val;
-   //   else
-   //     case(control_out.is_jump)
-   //       1'b0:  PC_next = PC_plus_4;
-   //       1'b1:  PC_next = {alu_result[31:1],0};
-   //     endcase
-   // end
-
-   // This params are temporal
-   // localparam  PC_PLUS_4 = 0;
-   // localparam  PC_BRANCH = 1;
-   // localparam  PC_JUMP = 2;
-   // localparam  PC_MTVEC = 3;
-   // localparam  PC_MEPC = 4;
-
-//select PC_next
+   //select PC_next
    always_comb begin
      case (control_out.pc_next)
        Common::PC_PLUS_4: PC_next = PC_plus_4;
@@ -75,20 +58,6 @@ module unicycle(
      endcase
    end
 
-   //This is old
-   // always_comb
-   //  begin
-   //    if(control_out.is_branch)
-   //      PC_next = PC_reg + immediate_val;
-   //    else if(control_out.is_jump)
-   //      PC_next = memToReg;
-   //    else if(control_out.excRequest)
-   //      PC_next = mtvec;
-   //    else if(control_out.excRet)
-   //      PC_next = mepc;
-   //    else
-   //      PC_next = PC_plus_4;
-   // end
 
    always_ff @(posedge clk) begin
      if (rst) PC_reg <= 0;
@@ -109,7 +78,7 @@ module unicycle(
 
    // Control
    Common::control_out_t control_out;
-   assign control_out = Control::control_from_instruction(decoded_instr,doBranch);
+   assign control_out = Control::control_from_instruction(decoded_instr,doBranch,exceptionPresent);
 
    //////////////////
    // Register File
@@ -186,7 +155,7 @@ module unicycle(
     endcase
   end
 
-   assign data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i;
+   assign data_mem_out = (control_out.mem_from_mtime) ?  mtimeData : readData_i;
 
    ////////////////////
    // CSRs
