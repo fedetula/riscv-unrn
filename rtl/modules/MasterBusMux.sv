@@ -2,13 +2,15 @@ import Common::*;
 
 
 module MasterBusMux
+#(type TCmd = logic,
+  type TResult = logic)
   (input logic useA,
-   input  MemoryBusCmd busACmd,
-   output MemoryBusResult busAResult,
-   input  MemoryBusCmd busBCmd,
-   output MemoryBusResult busBResult,
-   output MemoryBusCmd busCommonCmd,
-   input  MemoryBusResult busCommonResult
+   input  TCmd busACmd,
+   output TResult busAResult,
+   input  TCmd busBCmd,
+   output TResult busBResult,
+   output TCmd busCommonCmd,
+   input  TResult busCommonResult
    );
 
    always_comb begin
