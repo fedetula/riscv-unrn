@@ -170,7 +170,7 @@ module unicycle(
      instType_o = control_out.instType;
      case (dataAddress_o)
        MTIME_MEM_ADDRESS_LOW,
-       MTIME_MEM_ADDRESS_HIGH
+       MTIME_MEM_ADDRESS_HIGH,
        MTIMECMP_MEM_ADDRESS_LOW,
        MTIME_MEM_ADDRESS_LOW:
                   begin         // If we actually are:

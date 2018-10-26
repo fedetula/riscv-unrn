@@ -174,15 +174,15 @@ package riscV_unrn_pkg;
    */
 
    typedef enum logic [3:0]{
-      MEM_LB =  4'b1000;
-      MEM_LH =  4'b1001;
-      MEM_LW =  4'b1010;
-      MEM_LBU = 4'b1011;
-      MEM_SB =  4'b1100;
-      MEM_SH =  4'b1101;
-      MEM_SW =  4'b1110;
-      MEM_LHU = 4'b1111;
-      MEM_NOP = 4'b0000;
+      MEM_LB =  4'b1000,
+      MEM_LH =  4'b1001,
+      MEM_LW =  4'b1010,
+      MEM_LBU = 4'b1011,
+      MEM_SB =  4'b1100,
+      MEM_SH =  4'b1101,
+      MEM_SW =  4'b1110,
+      MEM_LHU = 4'b1111,
+      MEM_NOP = 4'b0000
    }mem_inst_type_t;
 
 
