@@ -3,7 +3,7 @@ import Common::*;
 module ControlMem(
  input [1:0] address,
  input uint32 dataMemOut,
- input logic [3:0] instType,
+ input mem_inst_type_t instType,
  output      uint32 dataRead,
  output logic [3:0] maskByte,
  output logic read,write,exception
@@ -30,7 +30,7 @@ module ControlMem(
     write = 0;
     maskByte = 4'b1111;
 		case(instType)
-  		4'b1000: begin   //Load Byte
+  		MEM_LB: begin   //Load Byte
         				read = 1;
         				exception = 0;
         				unique case(address)
@@ -41,7 +41,7 @@ module ControlMem(
               				//default: dataRead='x;
         				endcase
         			end
-  		4'b1001: begin   //Load Half
+  		MEM_LH: begin   //Load Half
         				read = 1;
         				case(address)
             				0: begin
@@ -66,7 +66,7 @@ module ControlMem(
             				   end
         				endcase
         			end
-  		4'b1010: begin   //Load Word
+  		MEM_LW: begin   //Load Word
         				read = 1;
         				case(address)
             				0: begin
@@ -90,7 +90,7 @@ module ControlMem(
             				   end
         				endcase
         			end
-  		4'b1011: begin //Load Unsigned Byte
+  		MEM_LBU: begin //Load Unsigned Byte
         				read = 1;
         				exception=0;
         				unique case(address)
@@ -101,7 +101,7 @@ module ControlMem(
             				//default: dataRead='x
         				endcase
   			      end
-  		4'b1100: begin   //Store Byte
+  		MEM_SB: begin   //Store Byte
         				write = 1;
         				exception=0;
                 //dataMemIn = write_data;
@@ -124,7 +124,7 @@ module ControlMem(
             				   end
         				endcase
         			end
-  		4'b1101: begin   //Store Half
+  		MEM_SH: begin   //Store Half
         				write = 1;
                 //dataMemIn = write_data;
         				case(address)
@@ -151,7 +151,7 @@ module ControlMem(
             				   end
         				endcase
         			 end
-  		4'b1110: begin   //Store Word
+  		MEM_SW: begin   //Store Word
         				write = 1;
                 //dataMemIn = write_data;
         				case(address)
@@ -180,7 +180,7 @@ module ControlMem(
             				   end
             				endcase
         			end
-  		4'b1111: begin   //Load Unsigned Half
+  		  MEM_LHU: begin   //Load Unsigned Half
         				read = 1;
                 //dataMemIn = write_data; LEA:esto estaba antes, yo lo borraria
         				case(address)

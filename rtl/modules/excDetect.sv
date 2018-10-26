@@ -1,10 +1,12 @@
 import Common::*;
 import Control::*;
+import riscV_unrn_pkg::*;
+
 
 module excDetect(
                 input logic [31:0]  pc_i,
                 input logic [31:0]  dataAddress_i,
-                input memInstType_t memInstType_i,
+                input mem_inst_type_t memInstType_i,
                 input opcode_t      opcode_i,
                 input logic         priv_i,
                 input logic [31:0]  privCause_i,

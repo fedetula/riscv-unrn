@@ -184,4 +184,23 @@ module unicycle(
      .mtimeData_o   (mtimeData)
      );
 
+     ////////////////////
+     // excDetect
+     ////////////////////
+
+     excDetect excDetect(
+     //inputs
+     .pc_i(pc_o),
+     .dataAddress_i(),
+     .memInstType_i(),
+     .opcode_i(decoded_instr.opcode),
+     .priv_i(),
+     .privCause_i(),
+     //Outs
+     .excCause_o(),
+     .trapInfo_o(),
+     .excPresent_o(exceptionPresent)
+     );
+
+
 endmodule

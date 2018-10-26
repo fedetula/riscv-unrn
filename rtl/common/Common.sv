@@ -117,6 +117,9 @@ package Common;
                       PC_MEPEC = 'b100
                       } pc_next_t;
 
+    typedef enum logic [3:0] {
+
+    }memInstType_t;
 
 
    /*----------ESTRUCTURAS-----------*/
@@ -141,7 +144,7 @@ package Common;
       logic [1:0]       pcSource;
       logic 			      csr_source;
       ALU_control_t     alu_op;
-      logic [3:0]       instType;
+      mem_inst_type_t    instType;
       logic             reg_write;
       logic             unsign;
       logic [1:0]       csr_op;
