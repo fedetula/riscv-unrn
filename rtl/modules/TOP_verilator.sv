@@ -36,7 +36,7 @@ module TOP_verilator(
    assign probe_bus_cmd.write_data = probe_write_data;
    assign probe_read_data = probe_bus_result.read_data;
 
-
+//Bus
    MasterBusMux #(.TCmd(MemoryBus::Cmd),
                   .TResult(MemoryBus::Result))
    master_bus(.useA(probe_mem),
@@ -62,6 +62,21 @@ module TOP_verilator(
              .cmd_2(uart_bus_cmd),
              .result_2(uart_bus_result));
 
+//Memory Interface
+/* Tomi: Me queda la duda si este hay que agregarlo, creo que si pero bueno confirmen
+ControlMem controllerMem(.address(),
+                         .dataMemOut(),
+                         .instType,
+                         .dataRead(),
+                         .maskByte(),
+                         .read(),
+                         .write(),
+                         exception()
+                        );*/
+
+
+//Memory
+
    uint32 pc = 0;
    uint32 instruction;
 
@@ -69,8 +84,32 @@ module TOP_verilator(
                     .rst(rst_platform),
                     .membuscmd(data_bus_cmd),
                     .membusres(data_bus_result),
-                    .pc, .instruction);
+                    .pc(pc),
+                    .instruction(instruction)
+                    );
+//Core
 
-   unicycle unicycle(.clk, .rst(rst_cpu));
+   unicycle unicycle(
+                    //INPUTS
+                    .clk,
+                    .rst(rst_cpu)
+                    .readData_i(),
+                    .memException_i(),
+                    .instruction_i(instruction),
+                    //OUTPUS
+                    .instType,
+                    .writeData_o(),
+                    .dataAddress_o(),
+                    .pc_o(pc)
+   );
+
+
+
+
+
+
+
+
+
 
 endmodule; // TOP_verilator

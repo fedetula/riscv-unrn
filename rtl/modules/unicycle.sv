@@ -5,7 +5,7 @@ module unicycle(
                 input logic clk,
                 input logic rst,
                 //Memory Interface
-                output logic [3:0]  instType_o,
+                output mem_inst_type_t   instType_o,
                 output uint32       writeData_o,
                 output uint32       dataAddress_o,
                 input  uint32       readData_i,
