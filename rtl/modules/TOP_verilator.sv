@@ -29,6 +29,8 @@ module TOP_verilator(
    MemoryBus::Cmd uart_bus_cmd;
    MemoryBus::Result uart_bus_result;
 
+   Common::uint32 dataRead_mem;
+
    assign probe_bus_cmd.address = probe_address;
    assign probe_bus_cmd.mem_read = probe_mem_read;
    assign probe_bus_cmd.mem_write = probe_mem_write;
@@ -67,11 +69,11 @@ module TOP_verilator(
 ControlMem controllerMem(.address(),
                          .dataMemOut(),
                          .instType,
-                         .dataRead(),
-                         .maskByte(),
-                         .read(),
-                         .write(),
-                         exception()
+                         .dataRead(data de memoria),
+                         .maskByte(memoria.mask_byte),
+                         .read(memoria.mask_byte),
+                         .write(memoria.mask_byte),
+                         .exception()
                         );*/
 
 
@@ -89,17 +91,20 @@ ControlMem controllerMem(.address(),
                     );
 //Core
 
+assign cpu_bus_cmd.address = addressCpu_o[31:2];
+
+
    unicycle unicycle(
                     //INPUTS
                     .clk,
                     .rst(rst_cpu)
-                    .readData_i(),
+                    .readData_i(cpu_bus_result),
                     .memException_i(),
                     .instruction_i(instruction),
                     //OUTPUS
                     .instType,
-                    .writeData_o(),
-                    .dataAddress_o(),
+                    .writeData_o(cpu_bus_cmd.write_data),
+                    .dataAddress_o(addressCpu_o),
                     .pc_o(pc)
    );
 
