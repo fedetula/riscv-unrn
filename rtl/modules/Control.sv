@@ -11,11 +11,11 @@ package Control;
 	    automatic Common::opcode_t opcode = instr.opcode;
 
 	// is_branch
-      result.is_branch = opcode == 7'1100011;
+      result.is_branch = opcode == 7'b1100011;
 
 	//is_jump
-      case(opcode)
-        7'110?111: begin
+      casez(opcode)
+        7'b110?111: begin
            result.is_jump = 1;
         end
         default: begin
@@ -74,7 +74,8 @@ package Control;
               result.inst_invalid = 1;
       			  result.instType = Common::MEM_NOP;
               result.excCause[31] = 0;
-              result.excCause[30:0] = 2'h2;
+               // FIXME(nbertolo): esto está bien?
+              result.excCause[30:0] = 31'h2;
       			end
       		endcase
 		end
@@ -152,7 +153,8 @@ package Control;
       			begin
               result.inst_invalid = 1;
               result.excCause[31] = 0;
-              result.excCause[30:0] = 2'h2;
+              // FIXME(nbertolo): esto está bien?
+              result.excCause[30:0] = 31'h2;
       			end
       		endcase
 		end
@@ -208,8 +210,8 @@ package Control;
               default: begin
                 result.inst_invalid = 1;
                 result.instType = Common::MEM_NOP;
-                result.excCause[31] = 0;
-                result.excCause[30:0] = 2'h2;
+                // FIXME(nbertolo): esto está bien?
+                result.excCause[30:0] = 31'h2;
               end
             endcase
           end
@@ -274,7 +276,8 @@ package Control;
       			begin
               result.inst_invalid = 1;
               result.excCause[31] = 0;
-              result.excCause[30:0] = 2'h2;
+              // FIXME(nbertolo): esto está bien?
+              result.excCause[30:0] = 31'h2;
       			end
       		endcase
 		end
@@ -339,7 +342,8 @@ package Control;
       			begin
               result.inst_invalid = 1;
               result.excCause[31] = 0;
-              result.excCause[30:0] = 2'h2;
+              // FIXME(nbertolo): esto está bien?
+              result.excCause[30:0] = 31'h2;
       			end
       		endcase
 		end
@@ -419,7 +423,8 @@ package Control;
       					result.regData = 2'b10;
       					result.reg_write = 0;
                 result.excCause[31] = 0;
-                result.excCause[30:0] = 2'h3;
+                // FIXME(nbertolo): esto está bien?
+                result.excCause[30:0] = 31'h2;
                 result.excRet = 1'b0;
       				end
       				3'b010://MRET
@@ -443,7 +448,8 @@ package Control;
                 result.inst_invalid = 1;
                 result.excRet = 1'b0;
                 result.excCause[31] = 0;
-                result.excCause[30:0] = 2'h2;
+                // FIXME(nbertolo): esto está bien?
+                result.excCause[30:0] = 31'h2;
       				end
       				endcase
       			end
@@ -505,7 +511,8 @@ package Control;
       			begin
               result.inst_invalid = 1;
               result.excCause[31] = 0;
-              result.excCause[30:0] = 2'h2;
+              // FIXME(nbertolo): esto está bien?
+              result.excCause[30:0] = 31'h2;
               result.excRet = 1'b0;
       			end
       		endcase
@@ -513,10 +520,11 @@ package Control;
 		default begin
           result.inst_invalid = 1;
           result.excCause[31] = 0;
-          result.excCause[30:0] = 2'h2;
+          // FIXME(nbertolo): esto está bien?
+          result.excCause[30:0] = 31'h2;
           result.excRet = 1'b0;
-                assert(0) else $error("could not classify opcode %b into instr type",
-                                     opcode);
+                $display("ERROR: could not classify opcode %b into instr type",
+                         opcode);
     		  end
 	endcase
 

@@ -93,15 +93,17 @@ ControlMem controllerMem(.address(),
 
 assign cpu_bus_cmd.address = addressCpu_o[31:2];
 
+   Common::mem_inst_type_t instType_o;
+   Common::uint32 addressCpu_o;
 
    unicycle unicycle(
                     //INPUTS
                     .clk,
-                    .rst(rst_cpu)
+                    .rst(rst_cpu),
                     .readData_i(cpu_bus_result),
                     .instruction_i(instruction),
                     //OUTPUS
-                    .instType,
+                    .instType_o,
                     .writeData_o(cpu_bus_cmd.write_data),
                     .dataAddress_o(addressCpu_o),
                     .pc_o(pc)

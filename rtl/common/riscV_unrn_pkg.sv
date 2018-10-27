@@ -174,9 +174,8 @@ package riscV_unrn_pkg;
    */
 
    // Instruction and Data Memory boundaries
-
-   localparam  PC_VALID_RANGE_BASE    = 32'h0000_0000;
-   localparam  PC_VALID_RANGE_LIMIT   = 32'h0000_FFFF;
-   localparam  MEM_VALID_RANGE_BASE   = 32'h0001_0000;
-   localparam  MEM_VALID_RANGE_LIMIT  = 32'hFFFF_FFFF;
+   localparam  PC_VALID_RANGE_BASE    = 32'h8000_0000;
+   localparam  PC_VALID_RANGE_LIMIT   = 32'h8000_FFFF;
+   localparam  MEM_VALID_RANGE_BASE   = 32'h8000_0000;
+   localparam  MEM_VALID_RANGE_LIMIT  = 32'h8000_FFFF;
 endpackage
