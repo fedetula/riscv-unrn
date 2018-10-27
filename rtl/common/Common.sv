@@ -114,13 +114,21 @@ package Common;
                       PC_BRANCH = 'b001,
                       PC_JUMP = 'b010,
                       PC_MTVEC = 'b011,
-                      PC_MEPEC = 'b100
-                      } pc_next_t;
+                      PC_MEPC = 'b100
+    } pc_next_t;
 
-    typedef enum logic [3:0] {
 
-    }memInstType_t;
-
+    typedef enum logic [3:0]{
+       MEM_LB =  4'b1000,
+       MEM_LH =  4'b1001,
+       MEM_LW =  4'b1010,
+       MEM_LBU = 4'b1011,
+       MEM_SB =  4'b1100,
+       MEM_SH =  4'b1101,
+       MEM_SW =  4'b1110,
+       MEM_LHU = 4'b1111,
+       MEM_NOP = 4'b0000
+    }mem_inst_type_t;
 
    /*----------ESTRUCTURAS-----------*/
 
@@ -134,14 +142,14 @@ package Common;
 						  regId_t rd;
 						} decoded_instr_t;
 
-   typedef struct     {
+   typedef struct packed{
       logic             is_branch;
       logic             mem_to_reg;
       logic             alu_from_imm;
       logic 			      alu_from_pc;
       logic 			      is_jump;
       logic [1:0]       regData;
-      logic [1:0]       pcSource;
+      pc_next_t         pcSource;
       logic 			      csr_source;
       ALU_control_t     alu_op;
       mem_inst_type_t    instType;
@@ -174,7 +182,7 @@ package Common;
         7'b1100011: return instr_type_SB;//RiscV32I
         7'b1000111: return instr_type_I;//RiscV32D	---------------------------------------------------------------?????
         7'b1101111: return instr_type_UJ;//RiscV32I
-		7'b1100111: return instr_type_I;//RiscV32I
+		    7'b1100111: return instr_type_I;//RiscV32I
         7'b1110011: return instr_type_I;//RiscV32I_privileged
         default: begin
            assert(0) else $error("could not classify opcode %b into instr type",
@@ -280,7 +288,7 @@ package Common;
             result = 0;
         end
         instr_type_I: begin
-           result.imm[10:0] = instr[31:21];
+           result.imm[11:0] = instr[31:20];
            result.rs1 = instr[19:15];
            result.funct3 = instr[14:12];
            result.rd = instr[11:7];

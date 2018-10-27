@@ -13,4 +13,4 @@ typedef struct packed {
    Common::uint32 read_data;
 } Result;
 
-endpackage; // MemoryBus
+endpackage // MemoryBus

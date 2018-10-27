@@ -99,7 +99,6 @@ assign cpu_bus_cmd.address = addressCpu_o[31:2];
                     .clk,
                     .rst(rst_cpu)
                     .readData_i(cpu_bus_result),
-                    .memException_i(),
                     .instruction_i(instruction),
                     //OUTPUS
                     .instType,

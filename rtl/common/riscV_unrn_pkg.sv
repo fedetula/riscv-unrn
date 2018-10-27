@@ -173,18 +173,10 @@ package riscV_unrn_pkg;
   		1      |		1			           |	11			    Load Unsigned Half
    */
 
-   typedef enum logic [3:0]{
-      MEM_LB =  4'b1000,
-      MEM_LH =  4'b1001,
-      MEM_LW =  4'b1010,
-      MEM_LBU = 4'b1011,
-      MEM_SB =  4'b1100,
-      MEM_SH =  4'b1101,
-      MEM_SW =  4'b1110,
-      MEM_LHU = 4'b1111,
-      MEM_NOP = 4'b0000
-   }mem_inst_type_t;
+   // Instruction and Data Memory boundaries
 
-
-
+   localparam  PC_VALID_RANGE_BASE    = 32'h0000_0000;
+   localparam  PC_VALID_RANGE_LIMIT   = 32'h0000_FFFF;
+   localparam  MEM_VALID_RANGE_BASE   = 32'h0001_0000;
+   localparam  MEM_VALID_RANGE_LIMIT  = 32'hFFFF_FFFF;
 endpackage

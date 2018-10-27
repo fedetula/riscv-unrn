@@ -17,7 +17,7 @@ module csrUnit
   input logic excRequest_i,           // Exception request from controller
   input logic [31:0] excCause_i,      // Exception Cause Code
   input logic [31:0] trapInfo_i,      // Trap Informtation from Controller
-  output logic exc_o,                 // We have an exception if enabled
+  output logic mtime_exc_o,                 // We have an exception if enabled
   output logic [31:0] mtvec_o,        // Trap Vector output
   output logic [31:0] mepc_o,
   // Timers
@@ -54,6 +54,8 @@ module csrUnit
   assign mtvec_o = mtvec_reg;
   assign mepc_o = mepc_reg;
 
+  // Check if enabled and pending interrupt match, for mtime interrupt
+  assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.mtip): 1'b0;
 
   //////////////////////////
   // Implemented Registers
@@ -95,6 +97,7 @@ module csrUnit
     endcase
 
   // Timer Registers
+      mtimeData_o = mtime_reg[31:0];
       case (mtimeAddress_i)
         MTIME_MEM_ADDRESS_LOW:      mtimeData_o = mtime_reg[31:0];
         MTIME_MEM_ADDRESS_HIGH:     mtimeData_o = mtime_reg[63:32];
@@ -176,7 +179,6 @@ module csrUnit
     //  Timer registers write
     ///////////////////////////
 
-    // TODO: Timer exceptions/interrupts
     mtime_next = mtime_reg + 1;
     mtimecmp_next = mtimecmp_reg;
     if (mtimeWe_i) begin
@@ -205,7 +207,6 @@ module csrUnit
       end
     end
 
-
     //////////////////////////////////////////////////////
     // Manage exceptions conditions to write to registers that need to be written
     /////////////////////////////////////////////////////
@@ -219,9 +220,6 @@ module csrUnit
     end
 
   end : write_logic
-
-  // Check if enabled and pending interrupt match
-  assign exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.mtip): 1'b0;
 
 
   always_ff @ (posedge clk) begin

@@ -17,15 +17,15 @@ package Control;
 
   //Logica para PC_next
   if(doBranch)// <--- External Signal
-    pcSource = Common::PC_BRANCH;
+    result.pcSource = Common::PC_BRANCH;
   else if(result.is_jump)
-    pcSource = Common::PC_JUMP;
+    result.pcSource = Common::PC_JUMP;
   else if(exceptionPresent) // <--- External Signal
-    pcSource = Common::PC_MTVEC;
+    result.pcSource = Common::PC_MTVEC;
   else if(result.excRet)
-    pcSource = Common::PC_MEPEC;
+    result.pcSource = Common::PC_MEPC;
   else
-    pcSource = Common::PC_PLUS_4;
+    result.pcSource = Common::PC_PLUS_4;
 
 	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write
 	case (opcode)
@@ -48,23 +48,23 @@ package Control;
       		result.alu_from_pc = 0;
       		case (instr.funct3)
       			3'b000: begin
-      			result.instType = MEM_LB;
+      			result.instType = Common::MEM_LB;
       			end
       			3'b001: begin
-      			result.instType = MEM_LH;
+      			result.instType = Common::MEM_LH;
       			end
       			3'b010: begin
-      			result.instType = MEM_LW;
+      			result.instType = Common::MEM_LW;
       			end
       			3'b100: begin
-      			result.instType = MEM_LBU;
+      			result.instType = Common::MEM_LBU;
       			end
       			3'b101: begin
-      			result.instType = MEM_LHU;
+      			result.instType = Common::MEM_LHU;
       			end
       			default: begin
               result.inst_invalid = 1;
-      			  result.instType = MEM_NOP;
+      			  result.instType = Common::MEM_NOP;
               result.excCause[31] = 0;
               result.excCause[30:0] = 2'h2;
       			end
@@ -88,7 +88,7 @@ package Control;
       		result.alu_from_imm = 0;
       		result.alu_op = Common::ALU_add;
       		result.reg_write = 0;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
       		end
 	 7'b0010011: begin//ARITHMETIC INM
       		//result.mem_read = 0;
@@ -107,7 +107,7 @@ package Control;
       		result.mem_to_reg = 0;
       		result.alu_from_imm = 1;
       		result.reg_write = 1;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
       		case(instr.funct3)
       			3'b000: begin
       			result.alu_op = Common::ALU_add;
@@ -166,7 +166,7 @@ package Control;
       		result.alu_from_imm = 1;
       		result.alu_op = Common::ALU_add;
       		result.reg_write = 1;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
 		end
 		7'b0100011: begin//STORE'S
         		//result.mem_read = 0;
@@ -189,17 +189,17 @@ package Control;
 
             case (instr.funct3)
               3'b000: begin
-                result.instType = MEM_SB;
+                result.instType = Common::MEM_SB;
               end
               3'b001: begin
-                result.instType = MEM_SH;
+                result.instType = Common::MEM_SH;
               end
               3'b010: begin
-                result.instType = MEM_SW;
+                result.instType = Common::MEM_SW;
               end
               default: begin
                 result.inst_invalid = 1;
-                result.instType = MEM_NOP;
+                result.instType = Common::MEM_NOP;
                 result.excCause[31] = 0;
                 result.excCause[30:0] = 2'h2;
               end
@@ -222,7 +222,7 @@ package Control;
       		result.mem_to_reg = 0;
       		result.alu_from_imm = 0;
       		result.reg_write = 1;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
       		case (instr.funct3)
       			3'b000: begin
       			case(instr.funct7[5])
@@ -282,7 +282,7 @@ package Control;
           result.excRequest = 0;
           result.csr_op = 2'h0;
       		result.csr_source=0;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
       		result.mem_to_reg = 0;
       		result.regData = 2'b11;
       		result.alu_from_pc = 0;
@@ -307,7 +307,7 @@ package Control;
       		result.mem_to_reg = 0;
       		result.alu_from_imm = 0;
       		result.reg_write = 0;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
       		case (instr.funct3)
       			3'b000: begin
       			result.alu_op = Common::ALU_ce;
@@ -353,7 +353,7 @@ package Control;
       		result.alu_from_imm = 1;
       		result.alu_op = Common::ALU_add;
       		result.reg_write = 1;
-      		result.instType = 4'b0000;
+      		result.instType = Common::MEM_NOP;
       		end
 		7'b1101111: begin//JAL
       		//result.mem_read = 0;
@@ -373,7 +373,7 @@ package Control;
       		result.alu_from_imm = 1;
       		result.alu_op = Common::ALU_add;
       		result.reg_write = 0;
-      		result.instType = 4'b0000;
+      		result.instType = Common::MEM_NOP;
 		      end
 		7'b1110011: begin // Estan completadas un poco, falta ver que pasa si rs1=0x00 o rd=0x00
       		//result.mem_read = 0;
@@ -384,7 +384,7 @@ package Control;
           result.inst_invalid = 0;
           result.mem_from_mtime = 1'b0;
       		result.alu_from_pc = 0;
-      		result.instType = MEM_NOP;
+      		result.instType = Common::MEM_NOP;
       		result.alu_op = Common::ALU_add;
       		result.mem_to_reg = 0;
       		result.alu_from_imm = 0;

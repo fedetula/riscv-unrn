@@ -7,13 +7,14 @@ module excDetect(
                 input logic [31:0]  pc_i,
                 input logic [31:0]  dataAddress_i,
                 input mem_inst_type_t memInstType_i,
-                input opcode_t      opcode_i,
+                //input opcode_t      opcode_i,
+                input logic         inst_invalid_i,
                 input logic         priv_i,
                 input logic [31:0]  privCause_i,
-
+                input logic         mtime_exc_i,
                 output logic [31:0] excCause_o,
                 output logic [31:0] trapInfo_o,
-                output logic        excPresent_o,
+                output logic        excPresent_o
                 );
 
 logic excPresent;
@@ -41,13 +42,19 @@ assign  trapInfo_o = trapInfo;
         excCause = M_INSTR_AFAULT;
         trapInfo = pc_i;
     end
+    // Invalid Instruction
+    else if (inst_invalid_i) begin
+      excPresent = 1;
+      excCause = M_ILL_INSTR;
+      trapInfo = pc_i;
+    end
     // Invalid memory access
     else if (memInstType_i[3]) begin
         if ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT) ) begin
           excPresent = 1;
-          case (memInstType)
-            MEM_LB, MEM_LH,MEM_LW, MEM_LBU MEM_LHU: excCause_o = M_LOAD_AFAULT;
-            MEM_SB, MEM_SH, MEM_SW:                 excCause_o = M_STORE_AFAULT;
+          case (memInstType_i)
+            MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = M_LOAD_AFAULT;
+            MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
           endcase
           trapInfo = dataAddress_i;
         end
@@ -58,9 +65,9 @@ assign  trapInfo_o = trapInfo;
       excCause  = privCause_i;
       trapInfo = pc_i;
     end
-
-    // TODO: Add mtime interrupt check
-
+    else if (mtime_exc_i) begin
+        excPresent = 1;
+    end
     // Misaligned memory access
     else  begin
       case (dataAddress_i[1:0])

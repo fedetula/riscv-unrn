@@ -9,7 +9,6 @@ module unicycle(
                 output uint32       writeData_o,
                 output uint32       dataAddress_o,
                 input  uint32       readData_i,
-                input  uint32       memException_i,
                 output uint32       pc_o,
                 input  raw_instr_t  instruction_i
                 );
@@ -21,7 +20,8 @@ module unicycle(
    uint32 alu_data1, alu_data2;                   // ALU Operands
    uint32 alu_result;                             // ALU output
    logic doBranch;                                //Result Branch
-   logic exceptionPresent;  //Falta instanciar excDetect señal para eso
+   logic exceptionPresent;
+   logic mtime_exc;
 
    // Register file in/out data
    uint32 reg_file_write_data;
@@ -48,7 +48,7 @@ module unicycle(
 
    //select PC_next
    always_comb begin
-     case (control_out.pc_next)
+     case (control_out.pcSource)
        Common::PC_PLUS_4: PC_next = PC_plus_4;
        Common::PC_BRANCH: PC_next = PC_reg + immediate_val;
        Common::PC_JUMP: PC_next = memToReg;
@@ -141,11 +141,11 @@ module unicycle(
        MTIME_MEM_ADDRESS_LOW,
        MTIME_MEM_ADDRESS_HIGH,
        MTIMECMP_MEM_ADDRESS_LOW,
-       MTIME_MEM_ADDRESS_LOW:
+       MTIMECMP_MEM_ADDRESS_HIGH:
                   begin         // If we actually are:
                      // Write to registers if on store
                      mtimeWe = control_out.instType[2] && (control_out.instType[1:0] != 2'b11);
-                     instType_o = 4'b0000;        // Invalidate access to memory
+                     instType_o = Common::MEM_NOP;        // Invalidate access to memory
                      mem_from_mtime = 1;   // Data comes from registes if on load
                   end
        default: begin
@@ -155,7 +155,7 @@ module unicycle(
     endcase
   end
 
-   assign data_mem_out = (control_out.mem_from_mtime) ?  mtimeData : readData_i;
+   assign data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i;
 
    ////////////////////
    // CSRs
@@ -163,47 +163,45 @@ module unicycle(
    uint32 dataToCsr;
    assign dataToCsr = (control_out.csr_source) ? reg_file_read_data1 : immediate_val;
 
+   logic [31:0] trapInfo;
+   logic [31:0] excCause;
 
    csrUnit csrs(
-      .clk(clk),
-      .rst(rst),
+     .clk           (clk),
+     .rst           (rst),
      .op_i          (control_out.csr_op),
-     .address_i     (decoded_instr.imm[11:0]), // TODO: Check this
+     .address_i     (immediate_val[11:0]),
      .data_i        (dataToCsr),
      .data_o        (csrReadData),
      .pc_i          (PC_reg),
      .excRequest_i  (control_out.excRequest),
-     .excCause_i    (excCause_i),
-     .trapInfo_i    (trapInfo_i),      // TODO: Check this
-     .exc_o         (exc_to_controler),          // TODO: Check this
+     .excCause_i    (excCause),
+     .trapInfo_i    (trapInfo),
+     .mtime_exc_o   (mtime_exc),
      .mtvec_o       (mtvec),
      .mepc_o        (mepc),
      .mtimeData_i   (reg_file_read_data2),
      .mtimeWe_i     (mtimeWe),
-     .mtimeAddress_i(alu_result),               //TODO: Check this
+     .mtimeAddress_i(alu_result),
      .mtimeData_o   (mtimeData)
      );
 
      ////////////////////
      // excDetect
      ////////////////////
-     logic [31:0] trapInfo_i;
-     logic [31:0] excCause_i;
 
      //Todavia no terminado revisar luego de finalizado las conexiones
      excDetect excDetect(
-     //inputs
-     .pc_i(pc_o),
-     .dataAddress_i(alu_result),
-     .memInstType_i(control_out.instType),
-     .opcode_i(),
-     //.invalid_i(control_out.inst_invalid),
-     .priv_i(control_out.inst_priv),
-     .privCause_i(control_out.excCause),
-     //Outputs
-     .excCause_o(excCause_i),
-     .trapInfo_o(trapInfo_i),
-     .excPresent_o(exceptionPresent)
+     .pc_i            (pc_o),
+     .dataAddress_i   (alu_result),
+     .memInstType_i   (control_out.instType),
+     .inst_invalid_i  (control_out.inst_invalid),
+     .priv_i          (control_out.inst_priv),
+     .privCause_i     (control_out.excCause),
+     .mtime_exc_i     (mtime_exc),
+     .excCause_o      (excCause),
+     .trapInfo_o      (trapInfo),
+     .excPresent_o    (exceptionPresent)
      );
 
 
