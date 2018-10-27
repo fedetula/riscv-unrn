@@ -1,10 +1,15 @@
 import Common::*;
 
 package Control;
-
-   function Common::control_out_t control_from_instruction(Common::decoded_instr_t instr, input logic doBranch, input logic exceptionPresent); // "instr" tiene que pasar como parametro. Antes debe ejecutar la funcion decode_instruction
+   // "instr" tiene que pasar como parametro.
+   // Antes debe ejecutar la funcion decode_instruction
+   function Common::control_out_t
+     control_from_instruction(Common::decoded_instr_t instr,
+                              logic doBranch,
+                              logic exceptionPresent);
      automatic Common::control_out_t result = 0;
-	   automatic Common::opcode_t opcode = Common::get_opcode(instr);
+	    automatic Common::opcode_t opcode = instr.opcode;
+ // Common::get_opcode(instr);
 	   automatic Common::instr_e instr_name = Common::get_instruction_name(instr);
 
 
