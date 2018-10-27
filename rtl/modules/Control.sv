@@ -9,16 +9,19 @@ package Control;
                               logic exceptionPresent);
      automatic Common::control_out_t result = 0;
 	    automatic Common::opcode_t opcode = instr.opcode;
- // Common::get_opcode(instr);
-	   automatic Common::instr_e instr_name = Common::get_instruction_name(instr);
 
-
-  //is_jump is_branch estan hechas por funcion para optimizar ver si descomentado en cada instruccion y sacando la funcion capas reduce recursos
 	// is_branch
-    result.is_branch = instr_name == (Common::instr_beq || Common::instr_bne || Common::instr_blt || Common::instr_bge || Common::instr_bltu || Common::instr_bgeu);
+      result.is_branch = opcode == 7'1100011;
 
 	//is_jump
-	result.is_jump = instr_name == (Common::instr_jal || Common::instr_jalr);
+      case(opcode)
+        7'110?111: begin
+           result.is_jump = 1;
+        end
+        default: begin
+          result.is_jump = 0;
+        end
+      endcase
 
   //Logica para PC_next
   if(doBranch)// <--- External Signal
