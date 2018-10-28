@@ -52,7 +52,7 @@ module TOP_verilator(
 
    SlaveBusMux #(.TCmd(MemoryBus::Cmd),
                  .TResult(MemoryBus::Result),
-                 .Base1(0),
+                 .Base1(PC_VALID_RANGE_BASE),
                  .Size1(2**10),
                  .Base2('h800),
                  .Size2(1))
@@ -65,16 +65,14 @@ module TOP_verilator(
              .result_2(uart_bus_result));
 
 //Memory Interface
-/* Tomi: Me queda la duda si este hay que agregarlo, creo que si pero bueno confirmen
-ControlMem controllerMem(.address(),
-                         .dataMemOut(),
-                         .instType,
-                         .dataRead(data de memoria),
-                         .maskByte(memoria.mask_byte),
-                         .read(memoria.mask_byte),
-                         .write(memoria.mask_byte),
-                         .exception()
-                        );*/
+ControllerMem controllerMem(.address(cpu_bus_cmd.address[1:0]),
+                            .dataMemOut(memory_bus_result.read_data),
+                            .instType(instType_cpu),
+                            .dataRead(cpu_bus_result.read_data),
+                            .maskByte(cpu_bus_cmd.mask_byte),
+                            .read(cpu_bus_cmd.mem_read),
+                            .write(cpu_bus_cmd.mem_write)
+                            );
 
 
 //Memory
@@ -93,7 +91,7 @@ ControlMem controllerMem(.address(),
 
 assign cpu_bus_cmd.address = addressCpu_o[31:2];
 
-   Common::mem_inst_type_t instType_o;
+   Common::mem_inst_type_t instType_cpu;
    Common::uint32 addressCpu_o;
 
    unicycle unicycle(
@@ -103,7 +101,7 @@ assign cpu_bus_cmd.address = addressCpu_o[31:2];
                     .readData_i(cpu_bus_result),
                     .instruction_i(instruction),
                     //OUTPUS
-                    .instType_o,
+                    .instType_o(instType_cpu),
                     .writeData_o(cpu_bus_cmd.write_data),
                     .dataAddress_o(addressCpu_o),
                     .pc_o(pc)

@@ -1,6 +1,6 @@
 import Common::*;
 
-module ControlMem(
+module ControllerMem(
  input [1:0] address,
  input uint32 dataMemOut,
  input mem_inst_type_t instType,
