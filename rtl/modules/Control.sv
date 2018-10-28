@@ -523,8 +523,8 @@ package Control;
           // FIXME(nbertolo): esto está bien?
           result.excCause[30:0] = 31'h2;
           result.excRet = 1'b0;
-                $display("ERROR: could not classify opcode %b into instr type",
-                         opcode);
+                // $display("ERROR: could not classify opcode %b into instr type",
+                //          opcode);
     		  end
 	endcase
 

@@ -55,7 +55,7 @@ module TOP_verilator(
                  .Base1(PC_VALID_RANGE_BASE),
                  .Size1(2**10),
                  .Base2('h800),
-                 .Size2(1))
+                 .Size2(2**2))
    slave_bus(.cmd_in(memory_bus_cmd),
              .result_out(memory_bus_result),
              .invalid_address(invalid_bus_address),
@@ -65,7 +65,7 @@ module TOP_verilator(
              .result_2(uart_bus_result));
 
 //Memory Interface
-ControllerMem controllerMem(.address(cpu_bus_cmd.address[1:0]),
+ControllerMem controllerMem(.address(addressCpu_o[1:0]),
                             .dataMemOut(memory_bus_result.read_data),
                             .instType(instType_cpu),
                             .dataRead(cpu_bus_result.read_data),

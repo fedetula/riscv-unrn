@@ -26,12 +26,15 @@ module SlaveBusMux #(type TCmd = logic,
       cmd_2 = '{default: 0};
       result_out = 'x;
 
-      if (cmd_in.address[29:LogSize1] == Base1[29:LogSize1]) begin
+
+      if (cmd_in.address[29:LogSize1-2] == Base1[31:LogSize1]) begin
          result_out = result_1;
          cmd_1 = cmd_in;
-      end if (cmd_in.address[29:LogSize2] == Base2[29:LogSize2]) begin
+         cmd_1.address[29:LogSize1-2] = 0;
+      end if (cmd_in.address[29:LogSize2-2] == Base2[31:LogSize2]) begin
          result_out = result_2;
          cmd_2 = cmd_in;
+         cmd_2.address[29:LogSize2-2] = 0;
       end else begin
         invalid_address = 1;
       end
