@@ -1,10 +1,14 @@
-//Baud Generator
+import Common::*;
 
-module uart_tx #(PARAMETER baudRate=9600)
+// baudrate 9600 -> 1041.5 counts
+
+module baudGen #(parameter baudRate = 10)
   (input logic clk,rst,
   input logic e_baudrate,
   output logic clk_baud
   );
+
+//baudrates = [115200, 57600, 38400, 19200, 9600, 4800, 2400, 1200, 600, 300]
 
 localparam N = $clog2(baudRate);
 
@@ -22,4 +26,6 @@ always_ff @(posedge clk) begin
   end
 end
 
-assign clk_baud=(cnt==0) ? e_baudrate : 0;
+assign clk_baud = (cnt==0) ? e_baudrate:0;
+
+endmodule
