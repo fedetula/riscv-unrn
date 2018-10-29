@@ -29,14 +29,12 @@ module TOP_verilator(
    MemoryBus::Cmd uart_bus_cmd;
    MemoryBus::Result uart_bus_result;
 
-   Common::uint32 dataRead_mem;
-
    assign probe_bus_cmd.address = probe_address;
    assign probe_bus_cmd.mem_read = probe_mem_read;
    assign probe_bus_cmd.mem_write = probe_mem_write;
    assign probe_bus_cmd.mask_byte = probe_mask_byte;
    assign probe_bus_cmd.write_data = probe_write_data;
-   assign probe_read_data = probe_bus_result.read_data;
+   assign probe_read_data = probe_bus_result;
 
 //Bus
    MasterBusMux #(.TCmd(MemoryBus::Cmd),
@@ -65,10 +63,13 @@ module TOP_verilator(
              .result_2(uart_bus_result));
 
 //Memory Interface
+   logic                                controller_exception;
+
 ControllerMem controllerMem(.address(addressCpu_o[1:0]),
-                            .dataMemOut(memory_bus_result.read_data),
+                            .dataMemOut(memory_bus_result),
                             .instType(instType_cpu),
-                            .dataRead(cpu_bus_result.read_data),
+                            .exception(controller_exception),
+                            .dataRead(cpu_bus_result),
                             .maskByte(cpu_bus_cmd.mask_byte),
                             .read(cpu_bus_cmd.mem_read),
                             .write(cpu_bus_cmd.mem_write)
@@ -77,7 +78,7 @@ ControllerMem controllerMem(.address(addressCpu_o[1:0]),
 
 //Memory
 
-   uint32 pc = 0;
+   uint32 pc;
    uint32 instruction;
 
    DataMem #(.WIDTH(15))
@@ -107,14 +108,5 @@ assign cpu_bus_cmd.address = addressCpu_o[31:2];
                     .dataAddress_o(addressCpu_o),
                     .pc_o(pc)
    );
-
-
-
-
-
-
-
-
-
 
 endmodule; // TOP_verilator

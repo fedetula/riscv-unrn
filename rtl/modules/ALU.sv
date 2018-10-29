@@ -53,7 +53,7 @@ module ALU
 		end
         default: begin
           result = 0; // avoid latch.
-          assert(0) else $error("unknown ALU op");
+          // assert(0) else $error("unknown ALU op");
         end
       endcase
    end

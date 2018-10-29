@@ -149,7 +149,6 @@ package Common;
       logic 			      alu_from_pc;
       logic 			      is_jump;
       logic [1:0]       regData;
-      pc_next_t         pcSource;
       logic 			      csr_source;
       ALU_control_t     alu_op;
       mem_inst_type_t    instType;
@@ -157,7 +156,6 @@ package Common;
       logic             inst_invalid;
       logic             inst_priv;
       logic [1:0]       csr_op;
-      logic             mem_from_mtime;
       logic             excRequest;
       logic             excRet;
       uint32            excCause;
@@ -185,8 +183,8 @@ package Common;
 		    7'b1100111: return instr_type_I;//RiscV32I
         7'b1110011: return instr_type_I;//RiscV32I_privileged
         default: begin
-           assert(0) else $error("could not classify opcode %b into instr type",
-                                 opcode);
+           // assert(0) else $error("could not classify opcode %b into instr type",
+                                 // opcode);
         end
       endcase
    endfunction
@@ -244,7 +242,7 @@ package Common;
            endcase
         end
         instr_type_R: begin
-           $display("%b", {opcode, instr.funct3, instr.funct7}); //No se que funcionalidad tiene (Consultar a nico)
+           // $display("%b", {opcode, instr.funct3, instr.funct7}); //No se que funcionalidad tiene (Consultar a nico)
            unique case ({opcode, instr.funct3, instr.funct7}) //Se deja  el opcode como entrada por si llegamos a usar instrucciones atomicas
              'b0110011_000_0000000: return instr_add;
              'b0110011_000_0100000: return instr_sub;
@@ -259,7 +257,7 @@ package Common;
            endcase
         end
         endcase
-        assert(0) else $error("instruction not implemented");
+        //assert(0) else $error("instruction not implemented");
    endfunction
 
    function int32_t sign_extend_imm(decoded_instr_t instr);
@@ -272,14 +270,14 @@ package Common;
         instr_type_SB: result =  32'(signed'(instr.imm[12:0]));
         instr_type_U:  result =  32'(signed'(instr.imm[31:0]));
         instr_type_UJ: result =  32'(signed'(instr.imm[20:0]));
-        instr_type_R:  assert(0) else $error("R-type instructions do not have imms");
+        // instr_type_R:  resultassert(0) else $error("R-type instructions do not have imms");
       endcase
       return result;
    endfunction
 
    function decoded_instr_t decode_instruction(raw_instr_t instr);
-      decoded_instr_t result;
-      instr_type_t instr_type;
+      decoded_instr_t result = '{default: 0};
+      instr_type_t instr_type = '{default: 0};
 
       result.opcode = get_opcode(instr);
       instr_type = get_instr_type(result.opcode);
@@ -294,7 +292,7 @@ package Common;
            result.rd = instr[11:7];
         end
         instr_type_U: begin
-           result.imm[19:0] = instr[31:12];
+           result.imm[31:12] = instr[31:12];
            result.rd = instr[11:7];
         end
         instr_type_R: begin

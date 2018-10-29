@@ -9,8 +9,6 @@ typedef struct packed {
    Common::uint32 write_data;
 } Cmd;
 
-typedef struct packed {
-   Common::uint32 read_data;
-} Result;
+typedef Common::uint32 Result;
 
 endpackage // MemoryBus

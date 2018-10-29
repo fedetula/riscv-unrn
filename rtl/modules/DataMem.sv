@@ -27,7 +27,6 @@ module DataMem
 
 //Variables
 uint32 writeValue;
-logic [29:0] pc_aux;
 
 assign writeValue = membuscmd.write_data;
 
@@ -37,9 +36,9 @@ assign instruction = mem[pc[WIDTH+1:2]]; //4 byte copy
 //Read Data
    always_comb begin
       if (membuscmd.mem_read) begin
-         membusres.read_data = mem[short_address]; //4 byte copy
+         membusres = mem[short_address]; //4 byte copy
       end else begin
-         membusres.read_data =  32'bx ; //4 byte copy
+         membusres =  32'bx ; //4 byte copy
       end
    end
 

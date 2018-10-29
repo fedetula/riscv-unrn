@@ -157,8 +157,8 @@ module ControllerMem(
         				case(address)
             				0: begin
             					     //LEA:ver que hacer porque no se puede grabar en esa direccion
-            					     exception=1;
-            					     maskByte = 4'b0000;
+            					     exception=0;
+            					     maskByte = 4'b1111;
             				   end
             				1: begin
             					     //LEA:ver que hacer porque no se puede grabar en esa direccion
@@ -172,7 +172,7 @@ module ControllerMem(
             				   end
             				3: begin
             					     exception=0;
-            					     maskByte = 4'b1111;
+            					     maskByte = 4'b0000;
             				   end
             				default: begin
             					     exception='x;//LEA:Dejar en dont care o en cero?

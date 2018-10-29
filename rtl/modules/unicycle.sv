@@ -60,7 +60,7 @@ module unicycle(
       else
         pcSource = Common::PC_PLUS_4;
 
-     case (control_out.pcSource)
+      case (pcSource)
        Common::PC_PLUS_4: PC_next = PC_plus_4;
        Common::PC_BRANCH: PC_next = PC_reg + immediate_val;
        Common::PC_JUMP: PC_next = memToReg;
@@ -72,7 +72,7 @@ module unicycle(
 
 
    always_ff @(posedge clk) begin
-     if (rst) PC_reg <= 0;
+     if (rst) PC_reg <= 32'h8000_0000;
      else begin
        PC_reg <= PC_next;
      end
@@ -90,8 +90,6 @@ module unicycle(
 
    // Control
    Common::control_out_t control_out;
-   // HACK(nbertolo): necessary to break the loop
-   // exceptionPresent = 0;
    assign control_out = Control::control_from_instruction(decoded_instr);
 
    //////////////////
@@ -99,7 +97,6 @@ module unicycle(
    //////////////////
 
    uint32 memToReg;
-   uint32 writeBack;
    uint32 mtimeData;
 
    // Data from memory or alu_result
@@ -109,7 +106,7 @@ module unicycle(
                     .rst(rst),
                     .read_reg1    (decoded_instr.rs1),
                     .read_reg2    (decoded_instr.rs2),
-                    .write_reg    (decoded_instr.rd),
+                    .write_reg   (decoded_instr.rd),
                     .write_data   (reg_file_write_data),
                     .write_enable (control_out.reg_write),
                     .read_data1   (reg_file_read_data1),
