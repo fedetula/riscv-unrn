@@ -4,10 +4,9 @@ package Control;
    // "instr" tiene que pasar como parametro.
    // Antes debe ejecutar la funcion decode_instruction
    function Common::control_out_t
-     control_from_instruction(Common::decoded_instr_t instr,
-                              logic doBranch,
-                              logic exceptionPresent);
-     automatic Common::control_out_t result = 0;
+     control_from_instruction(Common::decoded_instr_t instr);
+
+      automatic Common::control_out_t result = 0;
 	    automatic Common::opcode_t opcode = instr.opcode;
 
 	// is_branch
@@ -22,18 +21,6 @@ package Control;
           result.is_jump = 0;
         end
       endcase
-
-  //Logica para PC_next
-  if(doBranch)// <--- External Signal
-    result.pcSource = Common::PC_BRANCH;
-  else if(result.is_jump)
-    result.pcSource = Common::PC_JUMP;
-  else if(exceptionPresent) // <--- External Signal
-    result.pcSource = Common::PC_MTVEC;
-  else if(result.excRet)
-    result.pcSource = Common::PC_MEPC;
-  else
-    result.pcSource = Common::PC_PLUS_4;
 
 	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write
 	case (opcode)

@@ -19,7 +19,6 @@ module unicycle(
 
    uint32 alu_data1, alu_data2;                   // ALU Operands
    uint32 alu_result;                             // ALU output
-   logic doBranch;                                //Result Branch
    logic exceptionPresent;
    logic mtime_exc;
 
@@ -43,11 +42,24 @@ module unicycle(
    uint32 PC_plus_4;
 
    assign PC_plus_4 = PC_reg + 4;
-   assign doBranch = control_out.is_branch & alu_result[0];
 
 
    //select PC_next
    always_comb begin
+      //Logica para PC_next
+      pc_next_t pcSource;
+
+      if(control_out.is_branch & alu_result[0])
+        pcSource = Common::PC_BRANCH;
+      else if(control_out.is_jump)
+        pcSource = Common::PC_JUMP;
+      else if(exceptionPresent)
+        pcSource = Common::PC_MTVEC;
+      else if(control_out.excRet)
+        pcSource = Common::PC_MEPC;
+      else
+        pcSource = Common::PC_PLUS_4;
+
      case (control_out.pcSource)
        Common::PC_PLUS_4: PC_next = PC_plus_4;
        Common::PC_BRANCH: PC_next = PC_reg + immediate_val;
@@ -79,9 +91,8 @@ module unicycle(
    // Control
    Common::control_out_t control_out;
    // HACK(nbertolo): necessary to break the loop
-   // doBranch = 0;
    // exceptionPresent = 0;
-   assign control_out = Control::control_from_instruction(decoded_instr,0,0);
+   assign control_out = Control::control_from_instruction(decoded_instr);
 
    //////////////////
    // Register File
