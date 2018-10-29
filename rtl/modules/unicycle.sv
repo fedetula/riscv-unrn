@@ -78,7 +78,10 @@ module unicycle(
 
    // Control
    Common::control_out_t control_out;
-   assign control_out = Control::control_from_instruction(decoded_instr,doBranch,exceptionPresent);
+   // HACK(nbertolo): necessary to break the loop
+   // doBranch = 0;
+   // exceptionPresent = 0;
+   assign control_out = Control::control_from_instruction(decoded_instr,0,0);
 
    //////////////////
    // Register File
