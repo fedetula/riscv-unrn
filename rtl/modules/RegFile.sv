@@ -9,7 +9,7 @@ module RegFile(
                output      uint32 read_data1, read_data2
 			   );
   
-  uint32 registers[31];
+  uint32 registers[32];
 
    
 always_comb begin
