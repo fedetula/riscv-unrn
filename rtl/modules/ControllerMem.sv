@@ -25,6 +25,11 @@ module ControllerMem(
 
  */
  always_comb begin
+    dataRead = 0;
+    exception = 0;
+    maskByte = 0;
+    read = 0;
+    write = 0;
 
 		case(instType)
   		MEM_LB: begin   //Load Byte
@@ -59,7 +64,7 @@ module ControllerMem(
             				    end
             				default: begin
                 					exception='x;
-                					dataRead='x
+                			    dataRead='x;
             				   end
         				endcase
         			end
@@ -83,7 +88,7 @@ module ControllerMem(
             					     dataRead = 'x;
             				end
             				default: begin
-            					     dataRead='x
+            					     dataRead='x;
             				   end
         				endcase
         			end
@@ -101,7 +106,7 @@ module ControllerMem(
   		MEM_SB: begin   //Store Byte
         				write = 1;
         				exception=0;
-						dataMemIn = write_data;
+						// dataMemIn = dataMem;
         				case(address[1:0])
             				0: begin
             					     maskByte = 4'b0001;
@@ -145,11 +150,11 @@ module ControllerMem(
             					     maskByte=4'bxxxx;
             				   end
         				endcase
-        				dataMemIn = write_data;
+        				// dataMemIn = write_data;
         			 end
   		MEM_SW: begin   //Store Word
         				write = 1;
-                dataMemIn = write_data;
+                // dataMemIn = write_data;
         				case(address[1:0])
             				0: begin
             					     exception=0;
@@ -174,7 +179,6 @@ module ControllerMem(
             				endcase
         			end
   		  MEM_LHU: begin   //Load Unsigned Half
-  		  4'1111: begin   //Load Unsigned Half
         				read = 1;
         				case(address[1:0])
             				0: begin
@@ -195,7 +199,7 @@ module ControllerMem(
             				   end
             				default: begin
             					     exception='x;
-            					     dataRead='x
+            					     dataRead='x;
             				   end
             				endcase
         			end
@@ -204,7 +208,8 @@ module ControllerMem(
         				read = 0;
         				write = 0;
         				dataRead = 0;
-        				dataMemIn = 0;
+        				// dataMemIn = 0;
   			     end
 		endcase
 	end
+endmodule
