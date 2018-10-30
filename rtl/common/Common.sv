@@ -19,7 +19,7 @@ package Common;
                          instr_type_S,
                          instr_type_SB,
                          instr_type_U,
-                         instr_type_UJ
+                         instr_type_UJ,
                          } instr_type_t;
 
    typedef enum	logic [3:0] {

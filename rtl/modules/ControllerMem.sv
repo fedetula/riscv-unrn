@@ -25,53 +25,50 @@ module ControllerMem(
 
  */
  always_comb begin
-    dataRead = dataMemOut;
-    read = 0;
-    write = 0;
-    maskByte = 4'b1111;
+
 		case(instType)
   		MEM_LB: begin   //Load Byte
         				read = 1;
         				exception = 0;
-        				unique case(address)
+        				unique case(address[1:0])
               				0:  dataRead = 32'($signed(dataMemOut[7:0]));
-              				1:  dataRead = 32'($signed(dataMemOut[15:8])); //LEA:coregir sintaxis
-              				2:  dataRead = 32'($signed(dataMemOut[23:16])); //LEA:coregir sintaxis
-              				3:  dataRead = 32'($signed(dataMemOut[31:24])); //LEA:coregir sintaxis
+              				1:  dataRead = 32'($signed(dataMemOut[15:8])); 
+              				2:  dataRead = 32'($signed(dataMemOut[23:16])); 
+              				3:  dataRead = 32'($signed(dataMemOut[31:24]));
               				//default: dataRead='x;
         				endcase
         			end
   		MEM_LH: begin   //Load Half
         				read = 1;
-        				case(address)
+        				case(address[1:0])
             				0: begin
-            					     exception = 1;
-            					     dataRead = 'x;
-            				    end
-            				1: begin
             					     exception=0;
             					     dataRead = 32'($signed(dataMemOut[15:0]));
             				    end
+            				1: begin
+            					     exception=0;
+      					           dataRead = 32'($signed(dataMemOut[23:8]));
+            				   end
             				2: begin
             					     exception=0;
-      					           dataRead = 32'($signed(dataMemOut[23:8])); //LEA:coregir sintaxis
+            					     dataRead = 32'($signed(dataMemOut[31:16]));
             				   end
             				3: begin
-            					     exception=0;
-            					     dataRead = 32'($signed(dataMemOut[31:16])); //LEA:coregir sintaxis
-            				   end
+            					     exception = 1;
+            					     dataRead = 'x;
+            				    end
             				default: begin
-                					exception='x;//LEA:Dejar en dont care o en cero?
-                					dataRead='x;
+                					exception='x;
+                					dataRead='x
             				   end
         				endcase
         			end
   		MEM_LW: begin   //Load Word
         				read = 1;
-        				case(address)
+        				case(address[1:0])
             				0: begin
-            					     exception=1;
-            					     dataRead = 'x;
+            					     exception=0;
+            					     dataRead = dataMemOut;
             				   end
             				1: begin
             					     exception=1;
@@ -80,32 +77,32 @@ module ControllerMem(
             				2: begin
             					     exception=1;
             					     dataRead = 'x;
-            				end
-            				3: begin
-            					     exception=0;
-            					     dataRead = dataMemOut;
             				   end
+            				3: begin
+            					     exception=1;
+            					     dataRead = 'x;
+            				end
             				default: begin
-            					     dataRead='x;
+            					     dataRead='x
             				   end
         				endcase
         			end
   		MEM_LBU: begin //Load Unsigned Byte
         				read = 1;
         				exception=0;
-        				unique case(address)
+        				unique case(address[1:0])
             				0: dataRead = 32'($unsigned(dataMemOut[7:0]));
-            				1: dataRead = 32'($unsigned(dataMemOut[15:8])); //coregir sintaxis
-            				2: dataRead = 32'($unsigned(dataMemOut[23:16])); //coregir sintaxis
-            				3: dataRead = 32'($unsigned(dataMemOut[31:24])); //coregir sintaxis
+            				1: dataRead = 32'($unsigned(dataMemOut[15:8])); 
+            				2: dataRead = 32'($unsigned(dataMemOut[23:16])); 
+            				3: dataRead = 32'($unsigned(dataMemOut[31:24])); 
             				//default: dataRead='x
         				endcase
   			      end
   		MEM_SB: begin   //Store Byte
         				write = 1;
         				exception=0;
-                //dataMemIn = write_data;
-        				case(address)
+						dataMemIn = write_data;
+        				case(address[1:0])
             				0: begin
             					     maskByte = 4'b0001;
             				   end
@@ -119,90 +116,86 @@ module ControllerMem(
             					     maskByte = 4'b1000;
             				   end
             				default: begin
-            					     exception='x; //LEA:Dejar en dont care o en cero?
+            					     exception='x;
             					     maskByte=4'bxxxx;
             				   end
         				endcase
         			end
   		MEM_SH: begin   //Store Half
         				write = 1;
-                //dataMemIn = write_data;
-        				case(address)
+        				case(address[1:0])
             				0: begin
-            					     //LEA:ver que hacer porque no se puede grabar en esa direccion
-            					     exception=1;
-            					     maskByte = 4'b0000;
-            				   end
-            				1: begin
             					     exception=0;
             					     maskByte = 4'b0011;
             				   end
-            				2: begin
+            				1: begin
             					     exception=0;
             					     maskByte = 4'b0110;
             				   end
-            				3: begin
+            				2: begin
             					     exception=0;
             					     maskByte = 4'b1100;
             				   end
+            				3: begin
+            					     exception=1;
+            					     maskByte = 4'b0000;
+            				   end
             				default: begin
-            					     exception='x;//LEA:Dejar en dont care o en cero?
+            					     exception='x;
             					     maskByte=4'bxxxx;
             				   end
         				endcase
+        				dataMemIn = write_data;
         			 end
   		MEM_SW: begin   //Store Word
         				write = 1;
-                //dataMemIn = write_data;
-        				case(address)
+                dataMemIn = write_data;
+        				case(address[1:0])
             				0: begin
-            					     //LEA:ver que hacer porque no se puede grabar en esa direccion
             					     exception=0;
             					     maskByte = 4'b1111;
             				   end
             				1: begin
-            					     //LEA:ver que hacer porque no se puede grabar en esa direccion
             					     exception=1;
             					     maskByte = 4'b0000;
             				   end
             				2: begin
-            					     //LEA:ver que hacer porque no se puede grabar en esa direccion
             					     exception=1;
             					     maskByte = 4'b0000;
             				   end
             				3: begin
-            					     exception=0;
+            					     exception=1;
             					     maskByte = 4'b0000;
             				   end
             				default: begin
-            					     exception='x;//LEA:Dejar en dont care o en cero?
+            					     exception='x;
             					     maskByte=4'bxxxx;
             				   end
             				endcase
         			end
   		  MEM_LHU: begin   //Load Unsigned Half
+  		  4'1111: begin   //Load Unsigned Half
         				read = 1;
-                //dataMemIn = write_data; LEA:esto estaba antes, yo lo borraria
-        				case(address)
+        				case(address[1:0])
             				0: begin
-            					     exception=1;
-            					     dataRead = 'x;
-            				   end
-            				1: begin
               					   exception=0;
             					     dataRead = 32'($unsigned(dataMemOut[15:0]));
             				   end
+            				1: begin
+            					     exception=0;
+            					     dataRead = 32'($unsigned(dataMemOut[23:8]));
+            				   end
             				2: begin
             					     exception=0;
-            					     dataRead = 32'($unsigned(dataMemOut[23:8])); //LEA:coregir sintaxis
+            					     dataRead = 32'($unsigned(dataMemOut[31:16]));
             				   end
             				3: begin
-            					     exception=0;
-            					     dataRead = 32'($unsigned(dataMemOut[31:16])); //LEA:coregir sintaxis
+            					     exception=1;
+            					     dataRead = 'x;
             				   end
             				default: begin
-            					     exception='x;//LEA:Dejar en dont care o en cero?
-            					     dataRead='x;
+            					     exception='x;
+            					     dataRead='x
             				   end
             				endcase
         			end
@@ -211,9 +204,7 @@ module ControllerMem(
         				read = 0;
         				write = 0;
         				dataRead = 0;
-        				//dataMemIn = 0;
-  			       end
+        				dataMemIn = 0;
+  			     end
 		endcase
 	end
-
-endmodule
