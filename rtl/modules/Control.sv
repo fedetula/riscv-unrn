@@ -113,7 +113,7 @@ package Control;
       			result.alu_op = Common::ALU_slt;
       			end
       			3'b011: begin
-      			result.alu_op = Common::ALU_slt;
+      			result.alu_op = Common::ALU_sltu;
       			end
       			3'b100: begin
       			result.alu_op = Common::ALU_xor;
@@ -233,7 +233,7 @@ package Control;
       			result.alu_op = Common::ALU_slt;
       			end
       			3'b011: begin
-      			result.alu_op = Common::ALU_slt;
+      			result.alu_op = Common::ALU_sltu;
       			end
       			3'b100: begin
       			result.alu_op = Common::ALU_xor;
