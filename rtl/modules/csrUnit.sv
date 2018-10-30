@@ -103,7 +103,7 @@ module csrUnit
         MTIME_MEM_ADDRESS_HIGH:     mtimeData_o = mtime_reg[63:32];
         MTIMECMP_MEM_ADDRESS_LOW:   mtimeData_o = mtimecmp_reg[31:0];
         MTIMECMP_MEM_ADDRESS_HIGH:  mtimeData_o = mtimecmp_reg[63:32];
-        default: ;
+        default: mtimeData_o = 0;
       endcase
 
   end : read_logic
@@ -124,6 +124,7 @@ module csrUnit
 
     if (we) begin
       unique case (address_i)
+        default: begin end
         CSR_MSTATUS: begin
                         mstatus_next = csrWrite;
                         //Hardwired fields
@@ -134,7 +135,7 @@ module csrUnit
                         mstatus_next.spie = 1'b0;
                         mstatus_next.wpri3 = 1'b0;
                         mstatus_next.spp = 1'b0;
-                        mstatus_next.wpri2 = 1'b0;
+                        mstatus_next.wpri2 = 2'b0;
                         mstatus_next.fs = 2'b0;
                         mstatus_next.xs = 2'b0;
                         mstatus_next.mprv = 1'b0;
@@ -183,13 +184,13 @@ module csrUnit
     mtimecmp_next = mtimecmp_reg;
     if (mtimeWe_i) begin
       case (mtimeAddress_i)
-        MTIME_LOW:      mtime_next = {mtime_reg[63:32],mtimeData_i};
-        MTIME_HIGH:     mtime_next = {mtimeData_i,mtime_reg[31:0]};
-        MTIMECMP_LOW:   begin
+        MTIME_MEM_ADDRESS_LOW:      mtime_next = {mtime_reg[63:32],mtimeData_i};
+        MTIME_MEM_ADDRESS_HIGH:     mtime_next = {mtimeData_i,mtime_reg[31:0]};
+        MTIMECMP_MEM_ADDRESS_LOW:   begin
                           mtimecmp_next = {mtimecmp_reg[63:32],mtimeData_i};
                         mip_next.mtip = 0;      // Clear mtime pending interrupt bit when writing to mtimecmp register
                         end
-        MTIMECMP_HIGH:  begin
+        MTIMECMP_MEM_ADDRESS_HIGH:  begin
                           mtimecmp_next = {mtimeData_i,mtimecmp_reg[31:0]};
                           mip_next.mtip = 0;    // Clear mtime pending interrupt bit when writing to mtimecmp register
                         end

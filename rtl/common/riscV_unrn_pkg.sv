@@ -90,7 +90,7 @@ package riscV_unrn_pkg;
   // Machine Interrupt Pending Register (mip)
   //////////////////////////////////////
   typedef struct packed {
-    logic [XLEN-12:0] wiri1;  //Not implemented section
+    logic [XLEN-12-1:0] wiri1;  //Not implemented section
     logic             meip;   //Pending M-mode external interrupt
     logic             wiri2;  //Not implemented section
     logic             seip;   //Not implemented section - S-mode pending
@@ -109,9 +109,9 @@ package riscV_unrn_pkg;
   // Machine Interrupt Enable Register (mie)
   //////////////////////////////////////
   // Enabled interrupts: External M-mode
-  localparam  SUPPORTED_INTERRUPTS_MASK = 32'h880;
+  localparam  SUPPORTED_INTERRUPTS_MASK = 32'h080;
   typedef struct packed {
-    logic [XLEN-12:0] wiri1;  //Not implemented section
+    logic [XLEN-12-1:0] wiri1;  //Not implemented section
     logic             meie;   // M-mode external interrupt
     logic             wiri2;  //Not implemented section
     logic             seie;   //Not implemented section - S-mode
@@ -151,13 +151,6 @@ package riscV_unrn_pkg;
   localparam  logic [31:0] MTIME_MEM_ADDRESS_HIGH = 32'h0000_8008;
   localparam  logic [31:0] MTIMECMP_MEM_ADDRESS_LOW = 32'h0000_800C;
   localparam  logic [31:0] MTIMECMP_MEM_ADDRESS_HIGH = 32'h0000_8010;
-
-  typedef enum logic [1:0]{
-    MTIME_LOW,
-    MTIME_HIGH,
-    MTIMECMP_LOW,
-    MTIMECMP_HIGH
-  }mtime_address_t; //This are addresses internal to CSR unit
 
   //////////////
   // Memory

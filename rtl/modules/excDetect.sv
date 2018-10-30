@@ -53,6 +53,7 @@ assign  trapInfo_o = trapInfo;
         if ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT) ) begin
           excPresent = 1;
           case (memInstType_i)
+            default: begin end
             MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = M_LOAD_AFAULT;
             MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
           endcase
@@ -73,6 +74,7 @@ assign  trapInfo_o = trapInfo;
       case (dataAddress_i[1:0])
         1: begin
               case (memInstType_i)
+                default: begin end
                 MEM_LH,MEM_LW,MEM_LHU: begin
                                         excPresent = 1;
                                         excCause = M_LOAD_MISALIGN;
@@ -85,6 +87,7 @@ assign  trapInfo_o = trapInfo;
            end
         2: begin
               case (memInstType_i)
+                default: begin end
                 MEM_LW: begin
                           excPresent = 1;
                           excCause = M_LOAD_MISALIGN;
@@ -97,6 +100,7 @@ assign  trapInfo_o = trapInfo;
            end
         3: begin
               case (memInstType_i)
+                default: begin end
                 MEM_LH,MEM_LW,MEM_LHU: begin
                                         excPresent = 1;
                                         excCause = M_LOAD_MISALIGN;
