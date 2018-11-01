@@ -43,8 +43,9 @@ package Common;
                       PC_PLUS_4 = 'b000,
                       PC_BRANCH = 'b001,
                       PC_JUMP = 'b010,
-                      PC_MTVEC = 'b011,
-                      PC_MEPC = 'b100
+                      PC_JUMP_R = 'b011,
+                      PC_MTVEC = 'b100,
+                      PC_MEPC = 'b101
     } pc_next_t;
 
 
@@ -77,7 +78,8 @@ package Common;
       logic             mem_to_reg;
       logic             alu_from_imm;
       logic 			      alu_from_pc;
-      logic 			      is_jump;
+      logic 			      is_jal;
+      logic 			      is_jalr;
       logic [1:0]       regData;
       logic 			      csr_source;
       ALU_control_t     alu_op;

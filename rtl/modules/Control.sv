@@ -12,15 +12,8 @@ package Control;
 	// is_branch
       result.is_branch = opcode == 7'b1100011;
 
-	//is_jump
-      casez(opcode)
-        7'b110?111: begin
-           result.is_jump = 1;
-        end
-        default: begin
-          result.is_jump = 0;
-        end
-      endcase
+      result.is_jal = opcode == 7'b1101111;
+      result.is_jalr = opcode == 7'b1100111;
 
 	//mem_read ; mem_write ; mem_to_reg ; alu_from_imm ; alu_op ; reg_write
 	case (opcode)
@@ -433,7 +426,7 @@ package Control;
       			3'b001: begin
       			//CSRRW
             result.excRet = 1'b0;
-      				result.csr_source=0;
+      				result.csr_source=1;
       				result.regData = 2'b10;
       				result.reg_write = 1;
               result.csr_op = 2'h1;
@@ -442,7 +435,7 @@ package Control;
       			3'b010: begin
       			//CSRRS
               result.excRet = 1'b0;
-      				result.csr_source=0;
+      				result.csr_source=1;
       				result.regData = 2'b10;
       				result.reg_write = 1;
               result.csr_op = 2'h2;
@@ -451,7 +444,7 @@ package Control;
       			3'b011: begin
       			//CSRRC
               result.excRet = 1'b0;
-      				result.csr_source=0;
+      				result.csr_source=1;
       				result.regData = 2'b10;
       				result.reg_write = 1;
               result.csr_op = 2'h3;
@@ -460,7 +453,7 @@ package Control;
       			3'b101: begin
       			//CSRRWI
               result.excRet = 1'b0;
-      				result.csr_source=1;
+      				result.csr_source=0;
       				result.regData = 2'b10;
       				result.reg_write = 1;
               result.csr_op = 2'h1;
@@ -469,7 +462,7 @@ package Control;
       			3'b110: begin
       			//CSRRSI
               result.excRet = 1'b0;
-      				result.csr_source=1;
+      				result.csr_source=0;
       				result.regData = 2'b10;
       				result.reg_write = 1;
               result.csr_op = 2'h2;
@@ -478,7 +471,7 @@ package Control;
       			3'b111: begin
       			//CSRRCI
               result.excRet = 1'b0;
-      				result.csr_source=1;
+      				result.csr_source=0;
       				result.regData = 2'b10;
       				result.reg_write = 1;
               result.csr_op = 2'h3;

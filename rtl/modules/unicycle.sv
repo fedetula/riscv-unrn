@@ -51,8 +51,10 @@ module unicycle(
 
       if(control_out.is_branch & alu_result[0])
         pcSource = Common::PC_BRANCH;
-      else if(control_out.is_jump)
+      else if(control_out.is_jal)
         pcSource = Common::PC_JUMP;
+      else if(control_out.is_jalr)
+        pcSource = Common::PC_JUMP_R;
       else if(exceptionPresent)
         pcSource = Common::PC_MTVEC;
       else if(control_out.excRet)
@@ -64,6 +66,7 @@ module unicycle(
        Common::PC_PLUS_4: PC_next = PC_plus_4;
        Common::PC_BRANCH: PC_next = PC_reg + immediate_val;
        Common::PC_JUMP: PC_next = memToReg;
+       Common::PC_JUMP_R: PC_next = {memToReg[31:1], 1'b0};
        Common::PC_MTVEC: PC_next = mtvec;
        Common::PC_MEPC: PC_next = mepc;
        default: PC_next = PC_plus_4;
@@ -172,7 +175,7 @@ module unicycle(
    // CSRs
    ////////////////////
    uint32 dataToCsr;
-   assign dataToCsr = (control_out.csr_source) ? reg_file_read_data1 : immediate_val;
+   assign dataToCsr = (control_out.csr_source) ? reg_file_read_data1 : decoded_instr.rs1;
 
    logic [31:0] trapInfo;
    logic [31:0] excCause;
