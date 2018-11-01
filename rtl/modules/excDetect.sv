@@ -4,17 +4,19 @@ import riscV_unrn_pkg::*;
 
 
 module excDetect(
-                input logic [31:0]  pc_i,
-                input logic [31:0]  dataAddress_i,
-                input mem_inst_type_t memInstType_i,
+                 input               shouldJump_i,
+                 input logic [31:0]  pcJumpDst_i,
+                 input logic [31:0]  pc_i,
+                 input logic [31:0]  dataAddress_i,
+                 input               mem_inst_type_t memInstType_i,
                 //input opcode_t      opcode_i,
-                input logic         inst_invalid_i,
-                input logic         priv_i,
-                input logic [31:0]  privCause_i,
-                input logic         mtime_exc_i,
-                output logic [31:0] excCause_o,
-                output logic [31:0] trapInfo_o,
-                output logic        excPresent_o
+                 input logic         inst_invalid_i,
+                 input logic         priv_i,
+                 input logic [31:0]  privCause_i,
+                 input logic         mtime_exc_i,
+                 output logic [31:0] excCause_o,
+                 output logic [31:0] trapInfo_o,
+                 output logic        excPresent_o
                 );
 
 logic excPresent;
@@ -31,10 +33,10 @@ assign  trapInfo_o = trapInfo;
     trapInfo = 0;     //TODO: Verify this default values
 
     // Misaligned PC
-    if (pc_i[1:0] != 2'b00) begin
+    if (shouldJump_i && pcJumpDst_i[1:0] != 2'b00) begin
         excPresent = 1;
         excCause = M_INSTR_MISALIGN;
-        trapInfo = pc_i;
+        trapInfo = pcJumpDst_i;
     end
     // Invalid PC
     else if ((pc_i < PC_VALID_RANGE_BASE) || (pc_i > PC_VALID_RANGE_LIMIT) ) begin
@@ -48,6 +50,15 @@ assign  trapInfo_o = trapInfo;
       excCause = M_ILL_INSTR;
       trapInfo = pc_i;
     end
+     // Privilieged instruction
+    else if (priv_i) begin
+       excPresent = 1;
+       excCause  = privCause_i;
+       trapInfo = pc_i;
+    end
+    else if (mtime_exc_i) begin
+       excPresent = 1;
+    end
     // Invalid memory access
     else if (memInstType_i[3]) begin
         if ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT) ) begin
@@ -58,62 +69,54 @@ assign  trapInfo_o = trapInfo;
             MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
           endcase
           trapInfo = dataAddress_i;
+        end else  begin
+           trapInfo = dataAddress_i;
+           case (dataAddress_i[1:0])
+             1: begin
+                case (memInstType_i)
+                  default: begin end
+                  MEM_LH,MEM_LW,MEM_LHU: begin
+                     excPresent = 1;
+                     excCause = M_LOAD_MISALIGN;
+                  end
+                  MEM_SH, MEM_SW:        begin
+                     excPresent = 1;
+                     excCause = M_STORE_MISALIGN;
+                  end
+                endcase
+             end
+             2: begin
+                case (memInstType_i)
+                  default: begin end
+                  MEM_LW: begin
+                     excPresent = 1;
+                     excCause = M_LOAD_MISALIGN;
+                  end
+                  MEM_SW:        begin
+                     excPresent = 1;
+                     excCause = M_STORE_MISALIGN;
+                  end
+                endcase
+             end
+             3: begin
+                case (memInstType_i)
+                  default: begin end
+                  MEM_LH,MEM_LW,MEM_LHU: begin
+                     excPresent = 1;
+                     excCause = M_LOAD_MISALIGN;
+                  end
+                  MEM_SH, MEM_SW:        begin
+                     excPresent = 1;
+                     excCause = M_STORE_MISALIGN;
+                  end
+                endcase
+             end
+             default: begin
+                excPresent = 0;
+                trapInfo = 0;
+             end
+           endcase
         end
     end
-    // Privilieged instruction
-    else if (priv_i) begin
-      excPresent = 1;
-      excCause  = privCause_i;
-      trapInfo = pc_i;
-    end
-    else if (mtime_exc_i) begin
-        excPresent = 1;
-    end
-    // Misaligned memory access
-    else  begin
-      case (dataAddress_i[1:0])
-        1: begin
-              case (memInstType_i)
-                default: begin end
-                MEM_LH,MEM_LW,MEM_LHU: begin
-                                        excPresent = 1;
-                                        excCause = M_LOAD_MISALIGN;
-                                       end
-                MEM_SH, MEM_SW:        begin
-                                        excPresent = 1;
-                                        excCause = M_STORE_MISALIGN;
-                                       end
-              endcase
-           end
-        2: begin
-              case (memInstType_i)
-                default: begin end
-                MEM_LW: begin
-                          excPresent = 1;
-                          excCause = M_LOAD_MISALIGN;
-                        end
-                MEM_SW:        begin
-                                excPresent = 1;
-                                excCause = M_STORE_MISALIGN;
-                               end
-              endcase
-           end
-        3: begin
-              case (memInstType_i)
-                default: begin end
-                MEM_LH,MEM_LW,MEM_LHU: begin
-                                        excPresent = 1;
-                                        excCause = M_LOAD_MISALIGN;
-                                       end
-                MEM_SH, MEM_SW:        begin
-                                        excPresent = 1;
-                                        excCause = M_STORE_MISALIGN;
-                                       end
-              endcase
-           end
-        default: excPresent = 0;
-      endcase
-    end
   end
-
 endmodule

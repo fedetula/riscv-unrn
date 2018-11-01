@@ -65,12 +65,12 @@ module TOP_verilator(
              .result_2(uart_bus_result));
 
 //Memory Interface
-   logic                                controller_exception;
+   logic                                exception;
 
 ControllerMem controllerMem(.address(addressCpu_o[1:0]),
                             .dataMemOut(cpu_bus_result),
                             .instType(instType_cpu),
-                            .exception(controller_exception),
+                            .exception(exception),
                             .dataRead(cpu_data_result),
                             .maskByte(cpu_bus_cmd.mask_byte),
                             .read(cpu_bus_cmd.mem_read),
@@ -99,16 +99,17 @@ assign cpu_bus_cmd.address = addressCpu_o[31:2];
    Common::uint32 addressCpu_o;
 
    unicycle unicycle(
-                    //INPUTS
-                    .clk,
-                    .rst(rst_cpu),
-                    .readData_i(cpu_data_result),
-                    .instruction_i(instruction),
-                    //OUTPUS
-                    .instType_o(instType_cpu),
-                    .writeData_o(cpu_bus_cmd.write_data),
-                    .dataAddress_o(addressCpu_o),
-                    .pc_o(pc)
-   );
+                     //INPUTS
+                     .clk,
+                     .rst(rst_cpu),
+                     .readData_i(cpu_data_result),
+                     .instruction_i(instruction),
+                     //OUTPUS
+                     .instType_o(instType_cpu),
+                     .writeData_o(cpu_bus_cmd.write_data),
+                     .dataAddress_o(addressCpu_o),
+                     .exception_o(exception),
+                     .pc_o(pc)
+                     );
 
 endmodule; // TOP_verilator

@@ -5,12 +5,13 @@ module unicycle(
                 input logic clk,
                 input logic rst,
                 //Memory Interface
-                output mem_inst_type_t   instType_o,
-                output uint32       writeData_o,
-                output uint32       dataAddress_o,
-                input  uint32       readData_i,
-                output uint32       pc_o,
-                input  raw_instr_t  instruction_i
+                output      mem_inst_type_t instType_o,
+                output      uint32 writeData_o,
+                output      uint32 dataAddress_o,
+                input       uint32 readData_i,
+                output      uint32 pc_o,
+                input       raw_instr_t instruction_i,
+                output      exception_o
                 );
 
     /////////////////////
@@ -40,6 +41,9 @@ module unicycle(
    uint32 PC_reg;
    uint32 PC_next;
    uint32 PC_plus_4;
+   uint32 PC_JumpDst;
+   logic isJump;
+
 
    assign PC_plus_4 = PC_reg + 4;
 
@@ -48,15 +52,27 @@ module unicycle(
    always_comb begin
       //Logica para PC_next
       pc_next_t pcSource;
+      isJump = 0;
 
-      if(control_out.is_branch & alu_result[0])
-        pcSource = Common::PC_BRANCH;
-      else if(control_out.is_jal)
-        pcSource = Common::PC_JUMP;
-      else if(control_out.is_jalr)
-        pcSource = Common::PC_JUMP_R;
-      else if(exceptionPresent)
+      if(control_out.is_branch & alu_result[0]) begin
+         isJump = 1;
+         PC_JumpDst = PC_reg + immediate_val;
+      end if(control_out.is_jal) begin
+         isJump = 1;
+         PC_JumpDst = memToReg;
+      end else if(control_out.is_jalr) begin
+         isJump = 1;
+         PC_JumpDst = {memToReg[31:1], 1'b0};
+      end
+
+      if (exceptionPresent) begin
         pcSource = Common::PC_MTVEC;
+      end else if(control_out.is_jal) begin
+        pcSource = Common::PC_JUMP;
+      end else if(control_out.is_jalr) begin
+         pcSource = Common::PC_JUMP_R;
+      end else if(control_out.is_branch & alu_result[0])
+        pcSource = Common::PC_BRANCH;
       else if(control_out.excRet)
         pcSource = Common::PC_MEPC;
       else
@@ -111,7 +127,7 @@ module unicycle(
                     .read_reg2    (decoded_instr.rs2),
                     .write_reg   (decoded_instr.rd),
                     .write_data   (reg_file_write_data),
-                    .write_enable (control_out.reg_write),
+                    .write_enable (control_out.reg_write & ~exceptionPresent),
                     .read_data1   (reg_file_read_data1),
                     .read_data2   (reg_file_read_data2));
 
@@ -188,7 +204,7 @@ module unicycle(
      .data_i        (dataToCsr),
      .data_o        (csrReadData),
      .pc_i          (PC_reg),
-     .excRequest_i  (control_out.excRequest),
+     .excRequest_i  (control_out.excRequest || exceptionPresent),
      .excCause_i    (excCause),
      .trapInfo_i    (trapInfo),
      .mtime_exc_o   (mtime_exc),
@@ -206,17 +222,20 @@ module unicycle(
 
      //Todavia no terminado revisar luego de finalizado las conexiones
      excDetect excDetect(
-     .pc_i            (pc_o),
-     .dataAddress_i   (alu_result),
-     .memInstType_i   (control_out.instType),
-     .inst_invalid_i  (control_out.inst_invalid),
-     .priv_i          (control_out.inst_priv),
-     .privCause_i     (control_out.excCause),
-     .mtime_exc_i     (mtime_exc),
-     .excCause_o      (excCause),
-     .trapInfo_o      (trapInfo),
-     .excPresent_o    (exceptionPresent)
+                         .shouldJump_i(isJump),
+                         .pcJumpDst_i(PC_JumpDst),
+                         .pc_i            (pc_o),
+                         .dataAddress_i   (alu_result),
+                         .memInstType_i   (control_out.instType),
+                         .inst_invalid_i  (control_out.inst_invalid),
+                         .priv_i          (control_out.inst_priv),
+                         .privCause_i     (control_out.excCause),
+                         .mtime_exc_i     (mtime_exc),
+                         .excCause_o      (excCause),
+                         .trapInfo_o      (trapInfo),
+                         .excPresent_o    (exceptionPresent)
      );
 
+   assign exception_o = exceptionPresent;
 
 endmodule
