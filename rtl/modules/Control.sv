@@ -381,8 +381,7 @@ package Control;
       					result.csr_source=0;
       					result.regData = 2'b10;
       					result.reg_write = 0;
-                result.excCause[31] = 0;
-                result.excCause[30:0] = 31'd11;
+                result.excCause = 32'd11;
       				end
       				3'b001://EBREAK
       				begin
@@ -392,9 +391,7 @@ package Control;
       					result.csr_source=0;
       					result.regData = 2'b10;
       					result.reg_write = 0;
-                result.excCause[31] = 0;
-                // FIXME(nbertolo): esto está bien?
-                result.excCause[30:0] = 31'h2;
+                result.excCause = 32'h3;
                 result.excRet = 1'b0;
       				end
       				3'b010://MRET
@@ -417,9 +414,7 @@ package Control;
       				begin
                 result.inst_invalid = 1;
                 result.excRet = 1'b0;
-                result.excCause[31] = 0;
-                // FIXME(nbertolo): esto está bien?
-                result.excCause[30:0] = 31'h2;
+                result.excCause = 32'h2;
       				end
       				endcase
       			end

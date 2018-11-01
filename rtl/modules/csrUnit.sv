@@ -150,8 +150,8 @@ module csrUnit
 
         CSR_MTVEC:    begin
                         //Use only one of this lines: Hardcoded value vs. write data from datapath
-                        //mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
-                        mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
+                        mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
+                        // mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
                         mip_next = csrWrite & 32'h080;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts
@@ -212,10 +212,10 @@ module csrUnit
     // Manage exceptions conditions to write to registers that need to be written
     /////////////////////////////////////////////////////
 
-    if ((excRequest_i || mip_next.mtip) & mstatus_reg.mie) begin   //Exception request fromm controller or timer overflow
+    if (excRequest_i || mip_next.mtip) begin   //Exception request fromm controller or timer overflow
       //mip_next.meip = mie_next.meie;                             // Raise pending exception flag if enabled NOT IMPLEMENTED: WE ARE NOT USING EXTERNAL INTERRUPTS
       mepc_next = pc_i;                                            // Save actual pc
-      mcause_next = mip_next.mtip ? M_TIMER_INT : excCause_i;      // Register exception cause.
+      mcause_next = (mstatus_reg.mie && mip_next.mtip) ? M_TIMER_INT : excCause_i;      // Register exception cause.
 
       mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
     end
