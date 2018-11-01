@@ -362,7 +362,7 @@ package Control;
       		result.regData = 2'b01;
       		result.alu_from_imm = 1;
       		result.alu_op = Common::ALU_add;
-      		result.reg_write = 0;
+      		result.reg_write = 1;
       		result.instType = Common::MEM_NOP;
 		      end
 		7'b1110011: begin // Estan completadas un poco, falta ver que pasa si rs1=0x00 o rd=0x00
