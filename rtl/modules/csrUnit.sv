@@ -5,7 +5,8 @@ import riscV_unrn_pkg::*;
 module csrUnit
   (
   // Clock and Reset
-  input logic clk, rst,
+  input logic clk,
+  //rst,
   // From CSR Instructions
   input csr_op_t op_i,
   input csr_num_t address_i,
@@ -224,19 +225,19 @@ module csrUnit
 
 
   always_ff @ (posedge clk) begin
-      if(rst) begin
-        mstatus_reg   <= '0;
-        mtvec_reg     <= '0;
-        mip_reg       <= '0;
-        mie_reg       <= '0;
-        mscratch_reg  <= '0;
-        mepc_reg      <= '0;
-        mcause_reg    <= '0;
-        mtval_reg     <= '0;
-        mtime_reg     <= '0;
-        mtimecmp_reg  <= '0;
-      end
-      else  begin
+      // if(rst) begin
+      //   mstatus_reg   <= '0;
+      //   mtvec_reg     <= '0;
+      //   mip_reg       <= '0;
+      //   mie_reg       <= '0;
+      //   mscratch_reg  <= '0;
+      //   mepc_reg      <= '0;
+      //   mcause_reg    <= '0;
+      //   mtval_reg     <= '0;
+      //   mtime_reg     <= '0;
+      //   mtimecmp_reg  <= '0;
+      // end
+      // else  begin
         mstatus_reg   <= mstatus_next;
         mtvec_reg     <= mtvec_next;
         mip_reg       <= mip_next;
@@ -247,7 +248,7 @@ module csrUnit
         mtval_reg     <= mtval_next;
         mtime_reg     <= mtime_next;
         mtimecmp_reg  <= mtimecmp_next;
-      end
+      // end
   end
 
 

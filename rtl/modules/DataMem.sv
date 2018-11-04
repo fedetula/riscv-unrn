@@ -5,7 +5,7 @@ module DataMem
   #(parameter WIDTH=10)
    (
     input logic clk,
-    input logic rst,
+    // input logic rst,
     input       MemoryBus::Cmd membuscmd,
     output      MemoryBus::Result membusres,
     input       uint32 pc,
@@ -43,9 +43,9 @@ assign instruction = mem[pc[WIDTH+1:2]]; //4 byte copy
    end
 
 //Write Data
-always_ff @(posedge clk, posedge rst) begin
-    if (rst) mem <= '{default:0};
-    else
+always_ff @(posedge clk /*, posedge rst*/) begin
+    // if (rst) mem <= '{default:0};
+    // else
     if (membuscmd.mem_write) begin
 			case(membuscmd.mask_byte)
   			1:   mem[short_address][0] <= writeValue[7:0];//1 byte copy

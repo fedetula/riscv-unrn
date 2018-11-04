@@ -1,5 +1,5 @@
 import Common::*;
-import Control::*;
+//import Control::*;
 import riscV_unrn_pkg::*;
 
 
@@ -8,8 +8,8 @@ module excDetect(
                  input logic [31:0]  pcJumpDst_i,
                  input logic [31:0]  pc_i,
                  input logic [31:0]  dataAddress_i,
-                 input               mem_inst_type_t memInstType_i,
-                //input opcode_t      opcode_i,
+                 input mem_inst_type_t memInstType_i,
+                 //input opcode_t      opcode_i,
                  input logic         inst_invalid_i,
                  input logic         priv_i,
                  input logic [31:0]  privCause_i,
@@ -32,7 +32,7 @@ assign  trapInfo_o = trapInfo;
     excCause = 0;     //TODO: Verify this default values
     trapInfo = 0;     //TODO: Verify this default values
 
-    // Misaligned PC
+    // Misaligned PC on JUMPS
     if (shouldJump_i && pcJumpDst_i[1:0] != 2'b00) begin
         excPresent = 1;
         excCause = M_INSTR_MISALIGN;
@@ -56,67 +56,71 @@ assign  trapInfo_o = trapInfo;
        excCause  = privCause_i;
        trapInfo = pc_i;
     end
+    // Timer exception
     else if (mtime_exc_i) begin
        excPresent = 1;
     end
     // Invalid memory access
-    else if (memInstType_i[3]) begin
+    else if (memInstType_i[3]) begin // Do we have a valid intent for memory access?
+        // Raise exception if accesing to invalid Memory range
         if ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT) ) begin
-          excPresent = 1;
-          case (memInstType_i)
+            excPresent = 1;
+            case (memInstType_i)
             default: begin end
-            MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = M_LOAD_AFAULT;
-            MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
-          endcase
-          trapInfo = dataAddress_i;
-        end else  begin
-           trapInfo = dataAddress_i;
-           case (dataAddress_i[1:0])
-             1: begin
-                case (memInstType_i)
-                  default: begin end
-                  MEM_LH,MEM_LW,MEM_LHU: begin
-                     excPresent = 1;
-                     excCause = M_LOAD_MISALIGN;
-                  end
-                  MEM_SH, MEM_SW:        begin
-                     excPresent = 1;
-                     excCause = M_STORE_MISALIGN;
-                  end
-                endcase
-             end
-             2: begin
-                case (memInstType_i)
-                  default: begin end
-                  MEM_LW: begin
-                     excPresent = 1;
-                     excCause = M_LOAD_MISALIGN;
-                  end
-                  MEM_SW:        begin
-                     excPresent = 1;
-                     excCause = M_STORE_MISALIGN;
-                  end
-                endcase
-             end
-             3: begin
-                case (memInstType_i)
-                  default: begin end
-                  MEM_LH,MEM_LW,MEM_LHU: begin
-                     excPresent = 1;
-                     excCause = M_LOAD_MISALIGN;
-                  end
-                  MEM_SH, MEM_SW:        begin
-                     excPresent = 1;
-                     excCause = M_STORE_MISALIGN;
-                  end
-                endcase
-             end
-             default: begin
-                excPresent = 0;
-                trapInfo = 0;
-             end
-           endcase
+                MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = M_LOAD_AFAULT;
+                MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
+            endcase
+            trapInfo = dataAddress_i;
         end
-    end
+        // Else (valid memory range): Raise exception if misaligned access
+        else  begin
+            trapInfo = dataAddress_i;
+            case (dataAddress_i[1:0])
+                1: begin
+                    case (memInstType_i)
+                    default: begin end
+                        MEM_LH,MEM_LW,MEM_LHU: begin
+                            excPresent = 1;
+                            excCause = M_LOAD_MISALIGN;
+                        end
+                        MEM_SH, MEM_SW:        begin
+                            excPresent = 1;
+                            excCause = M_STORE_MISALIGN;
+                        end
+                    endcase
+                end
+                2: begin
+                    case (memInstType_i)
+                    default: begin end
+                        MEM_LW: begin
+                            excPresent = 1;
+                            excCause = M_LOAD_MISALIGN;
+                        end
+                        MEM_SW:        begin
+                            excPresent = 1;
+                            excCause = M_STORE_MISALIGN;
+                        end
+                    endcase
+                end
+                3: begin
+                    case (memInstType_i)
+                    default: begin end
+                        MEM_LH,MEM_LW,MEM_LHU: begin
+                            excPresent = 1;
+                            excCause = M_LOAD_MISALIGN;
+                        end
+                        MEM_SH, MEM_SW:        begin
+                            excPresent = 1;
+                            excCause = M_STORE_MISALIGN;
+                        end
+                    endcase
+                end
+                default: begin
+                    excPresent = 0;
+                    trapInfo = 0;
+                end
+            endcase
+        end
+  end
   end
 endmodule
