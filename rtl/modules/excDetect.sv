@@ -61,7 +61,7 @@ assign  trapInfo_o = trapInfo;
     end
     // Invalid memory access
     else if (memInstType_i[3]) begin
-        if ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT) ) begin
+            if (dataAddress_i != 'h100 &&  ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT)) ) begin
           excPresent = 1;
           case (memInstType_i)
             default: begin end

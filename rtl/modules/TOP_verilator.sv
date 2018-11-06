@@ -11,7 +11,9 @@ module TOP_verilator(
                      input logic        probe_mem_read, probe_mem_write,
                      input logic [3:0]  probe_mask_byte,
                      input              uint32 probe_write_data,
-                     output             uint32 probe_read_data
+                     output             uint32 probe_read_data,
+                     output logic [7:0] uart_data,
+                     output logic       uart_write
                      );
 
    logic                                invalid_bus_address;
@@ -28,6 +30,9 @@ module TOP_verilator(
 
    MemoryBus::Cmd uart_bus_cmd;
    MemoryBus::Result uart_bus_result;
+
+   assign uart_write = uart_bus_cmd.mem_write;
+   assign uart_data = uart_bus_cmd.write_data[7:0];
 
    uint32 cpu_data_result;
 
@@ -54,7 +59,7 @@ module TOP_verilator(
                  .TResult(MemoryBus::Result),
                  .Base1(PC_VALID_RANGE_BASE),
                  .Size1(2**15),
-                 .Base2('h800),
+                 .Base2('h100),
                  .Size2(2**2))
    slave_bus(.cmd_in(memory_bus_cmd),
              .result_out(memory_bus_result),
