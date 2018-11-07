@@ -1,5 +1,4 @@
 import Common::*;
-import Control::*;
 import riscV_unrn_pkg::*;
 
 

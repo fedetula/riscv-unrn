@@ -90,7 +90,7 @@ ControllerMem controllerMem(.address(addressCpu_o[1:0]),
 
    DataMem #(.WIDTH(15))
    data_mem(.clk,
-            .rst(rst_platform),
+            //.rst(rst_platform),
             .membuscmd(data_bus_cmd),
             .membusres(data_bus_result),
             .pc(pc),
