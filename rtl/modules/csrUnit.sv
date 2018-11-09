@@ -5,26 +5,27 @@ import riscV_unrn_pkg::*;
 module csrUnit
   (
   // Clock and Reset
-  input logic clk, rst,
+  input logic             clk, rst,
   // From CSR Instructions
-  input csr_op_t op_i,
-  input csr_num_t address_i,
+  input                   csr_op_t op_i,
+  input                   csr_num_t address_i,
   // From datapath
-  input logic [XLEN-1:0] data_i,
+  input logic [XLEN-1:0]  data_i,
   output logic [XLEN-1:0] data_o,
   // Exceptions
-  input logic [31:0] pc_i,            // Actual PC causing the exception
-  input logic excRequest_i,           // Exception request from controller
-  input logic [31:0] excCause_i,      // Exception Cause Code
-  input logic [31:0] trapInfo_i,      // Trap Informtation from Controller
-  output logic mtime_exc_o,                 // We have an exception if enabled
-  output logic [31:0] mtvec_o,        // Trap Vector output
-  output logic [31:0] mepc_o,
+  input logic [31:0]      pc_i, // Actual PC causing the exception
+  input logic             jumpingToMtvec_i,
+  input logic [31:0]      excCause_i, // Exception Cause Code
+  input logic [31:0]      trapInfo_i, // Trap Informtation from Controller
+  output logic            mtime_exc_o, // We have an exception if enabled
+  output logic [31:0]     mtvec_o, // Trap Vector output
+  output logic [31:0]     mepc_o,
+  output logic            mie_o,
   // Timers
-  input logic [31:0] mtimeData_i,
-  input logic mtimeWe_i,
-  input logic [31:0] mtimeAddress_i,
-  output logic [31:0] mtimeData_o
+  input logic [31:0]      mtimeData_i,
+  input logic             mtimeWe_i,
+  input logic [31:0]      mtimeAddress_i,
+  output logic [31:0]     mtimeData_o
 
   );
 
@@ -53,9 +54,10 @@ module csrUnit
   assign data_o = csrRead;
   assign mtvec_o = mtvec_reg;
   assign mepc_o = mepc_reg;
+  assign mie_o = mstatus_reg.mie;
 
   // Check if enabled and pending interrupt match, for mtime interrupt
-  assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.meie && mip_reg.mtip): 1'b0;
+  assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.mtie && mip_next.mtip): 1'b0;
 
   //////////////////////////
   // Implemented Registers
@@ -154,7 +156,7 @@ module csrUnit
                         // mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
-                        mip_next = csrWrite & 32'h080;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts
+                        // mip_next = csrWrite & 32'h000;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts
                       end
         CSR_MIE:      begin
                         mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
@@ -212,11 +214,10 @@ module csrUnit
     // Manage exceptions conditions to write to registers that need to be written
     /////////////////////////////////////////////////////
 
-    if (excRequest_i || mip_next.mtip) begin   //Exception request fromm controller or timer overflow
+    if (jumpingToMtvec_i) begin   //Exception request fromm controller or timer overflow
       //mip_next.meip = mie_next.meie;                             // Raise pending exception flag if enabled NOT IMPLEMENTED: WE ARE NOT USING EXTERNAL INTERRUPTS
       mepc_next = pc_i;                                            // Save actual pc
-      mcause_next = (mstatus_reg.mie && mip_next.mtip) ? M_TIMER_INT : excCause_i;      // Register exception cause.
-
+      mcause_next = excCause_i;      // Register exception cause.
       mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
     end
 

@@ -46,6 +46,8 @@ module unicycle(
 
     assign PC_plus_4 = PC_reg + 4;
 
+   logic  jumpToMtvec;
+   assign jumpToMtvec = control_out.excRequest || exceptionPresent;
 
     //select PC_next
     always_comb begin
@@ -64,7 +66,7 @@ module unicycle(
             PC_JumpDst = {memToReg[31:1], 1'b0};
         end
 
-        if (exceptionPresent) begin
+        if (jumpToMtvec) begin
             pcSource = Common::PC_MTVEC;
         end else if(control_out.is_jal) begin
             pcSource = Common::PC_JUMP;
@@ -204,6 +206,9 @@ module unicycle(
     logic [31:0] trapInfo;
     logic [31:0] excCause;
 
+   logic         mie;
+
+
     csrUnit csrs(
                 .clk           (clk),
                 .rst           (rst),
@@ -212,9 +217,10 @@ module unicycle(
                 .data_i        (dataToCsr),
                 .data_o        (csrReadData),
                 .pc_i          (PC_reg),
-                .excRequest_i  (control_out.excRequest || exceptionPresent),
+                .jumpingToMtvec_i(jumpToMtvec),
                 .excCause_i    (excCause),
                 .trapInfo_i    (trapInfo),
+                 .mie_o(mie),
                 .mtime_exc_o   (mtime_exc),
                 .mtvec_o       (mtvec),
                 .mepc_o        (mepc),
@@ -231,11 +237,14 @@ module unicycle(
     assign exception_o = exceptionPresent;
     //Todavia no terminado revisar luego de finalizado las conexiones
     excDetect excDetect(
+                        .clk,
                         .shouldJump_i(isJump),
                         .pcJumpDst_i(PC_JumpDst),
                         .pc_i            (pc_o),
                         .dataAddress_i   (alu_result),
                         .memInstType_i   (control_out.instType),
+                        .mie_i(mie),
+                        .jumpingToMtvec_i(jumpToMtvec),
                         .inst_invalid_i  (control_out.inst_invalid),
                         .priv_i          (control_out.inst_priv),
                         .privCause_i     (control_out.excCause),

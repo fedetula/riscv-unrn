@@ -58,7 +58,7 @@ module TOP_verilator(
    SlaveBusMux #(.TCmd(MemoryBus::Cmd),
                  .TResult(MemoryBus::Result),
                  .Base1(PC_VALID_RANGE_BASE),
-                 .Size1(2**15),
+                 .Size1(2**16),
                  .Base2('h100),
                  .Size2(2**2))
    slave_bus(.cmd_in(memory_bus_cmd),
@@ -88,7 +88,7 @@ ControllerMem controllerMem(.address(addressCpu_o[1:0]),
    uint32 pc;
    uint32 instruction;
 
-   DataMem #(.WIDTH(15))
+   DataMem #(.WIDTH(16))
    data_mem(.clk,
             //.rst(rst_platform),
             .membuscmd(data_bus_cmd),
