@@ -4,12 +4,14 @@ import MemoryBus::*;
 module DataMem
   #(parameter WIDTH=10)
    (
-    input logic clk,
+    input logic  clk,
     // input logic rst,
-    input       MemoryBus::Cmd membuscmd,
-    output      MemoryBus::Result membusres,
-    input       uint32 pc,
-    output      uint32 instruction
+    logic [29:0] bus_address,
+    logic        write_enable,
+    input        MemoryBus::Cmd membuscmd,
+    output       MemoryBus::Result membusres,
+    input        uint32 pc,
+    output       uint32 instruction
     );
 
 /*-----Dudas-----
@@ -23,7 +25,7 @@ module DataMem
    logic [3:0] [7:0] mem [2**WIDTH];
 
    logic [WIDTH-1:0] short_address;
-   assign short_address = membuscmd.address[WIDTH-1:0];
+   assign short_address = bus_address[WIDTH-1:0];
 
 //Variables
 uint32 writeValue;
@@ -46,7 +48,7 @@ assign instruction = mem[pc[WIDTH+1:2]]; //4 byte copy
 always_ff @(posedge clk /*, posedge rst*/) begin
     // if (rst) mem <= '{default:0};
     // else
-    if (membuscmd.mem_write) begin
+    if (write_enable) begin
 			case(membuscmd.mask_byte)
   			1:   mem[short_address][0] <= writeValue[7:0];//1 byte copy
   			2:   mem[short_address][1] <= writeValue[7:0];//1 byte copy

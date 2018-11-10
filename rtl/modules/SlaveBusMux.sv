@@ -6,15 +6,21 @@ module SlaveBusMux #(type TCmd = logic,
                      parameter Size2 = 0
                      )
    (
-    input              TCmd cmd_in,
-    output             TResult result_out,
-    output logic       invalid_address,
+    input logic [29:0]  address_in,
+    input logic         we_in,
+    input               TCmd cmd_in,
+    output              TResult result_out,
+    output logic        invalid_address,
     // == hw 1 ==
-    output             TCmd cmd_1,
-    input              TResult result_1,
+    output logic [29:0] address_1,
+    output logic         we_1,
+    output              TCmd cmd_1,
+    input               TResult result_1,
     // == hw 2 ==
-    output             TCmd cmd_2,
-    input              TResult result_2
+    output logic [29:0] address_2,
+    output logic         we_2,
+    output              TCmd cmd_2,
+    input               TResult result_2
     );
 
    localparam LogSize1 = $clog2(Size1);
@@ -24,17 +30,22 @@ module SlaveBusMux #(type TCmd = logic,
       invalid_address = 0;
       cmd_1 = '{default: 0};
       cmd_2 = '{default: 0};
+      we_1 = 0;
+      we_2 = 0;
+      address_1 = 0;
+      address_2 = 0;
       result_out = 'x;
 
-
-      if (cmd_in.address[29:LogSize1-2] == Base1[31:LogSize1]) begin
+      if (address_in[29:LogSize1-2] == Base1[31:LogSize1]) begin
          result_out = result_1;
          cmd_1 = cmd_in;
-         cmd_1.address[29:LogSize1-2] = 0;
-      end if (cmd_in.address[29:LogSize2-2] == Base2[31:LogSize2]) begin
+         we_1 = we_in;
+         address_1[LogSize1-1:0] = address_in[LogSize1-1:0];
+      end if (address_in[29:LogSize2-2] == Base2[31:LogSize2]) begin
          result_out = result_2;
          cmd_2 = cmd_in;
-         cmd_2.address[29:LogSize2-2] = 0;
+         we_2 = we_in;
+         address_2[LogSize2-1:0] = address_in[LogSize2-1:0];
       end else begin
         invalid_address = 1;
       end

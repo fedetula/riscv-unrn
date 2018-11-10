@@ -92,7 +92,7 @@ module unicycle(
 
 
     always_ff @(posedge clk) begin
-        if (rst) PC_reg <= 32'h8000_0000;
+        if (rst) PC_reg <= 32'h8000_0004;
         else begin
             PC_reg <= PC_next;
         end
