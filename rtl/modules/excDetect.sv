@@ -10,7 +10,6 @@ module excDetect(
                  input logic [31:0]  dataAddress_i,
                  input               mem_inst_type_t memInstType_i,
                 //input opcode_t      opcode_i,
-                 input logic         mie_i,
                  input logic         jumpingToMtvec_i,
                  input logic         inst_invalid_i,
                  input logic         priv_i,
@@ -24,25 +23,10 @@ module excDetect(
 logic excPresent;
 logic [31:0] excCause;
 logic [31:0] trapInfo;
-logic     mtime_exc_handled_reg;
-logic  mtime_exc_handled_next;
 
 assign  excPresent_o = excPresent;
 assign  excCause_o = excCause;
 assign  trapInfo_o = trapInfo;
-
-  always_comb begin
-     if (mie_i && mtime_exc_i == 0) begin
-        mtime_exc_handled_next = 0;
-     end else begin
-        mtime_exc_handled_next = mtime_exc_handled_reg ||
-                                 (jumpingToMtvec_i && excCause_o == M_TIMER_INT);
-     end
-  end
-
-   always_ff @(posedge clk) begin
-      mtime_exc_handled_reg <= mtime_exc_handled_next;
-   end
 
   always_comb begin
     excPresent = 0;
@@ -131,8 +115,11 @@ assign  trapInfo_o = trapInfo;
              end
            endcase
         end
+       if (excPresent) begin
+          $display("============warning==========");
+       end
     end
-    else if (mtime_exc_i && !mtime_exc_handled_reg) begin
+    else if (mtime_exc_i) begin
        excPresent = 1;
        excCause = M_TIMER_INT;
     end

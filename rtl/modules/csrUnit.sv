@@ -57,7 +57,7 @@ module csrUnit
   assign mie_o = mstatus_reg.mie;
 
   // Check if enabled and pending interrupt match, for mtime interrupt
-  assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.mtie && mip_next.mtip): 1'b0;
+  assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.mtie && mip_reg.mtip): 1'b0;
 
   //////////////////////////
   // Implemented Registers
@@ -126,7 +126,6 @@ module csrUnit
 
     if (we) begin
       unique case (address_i)
-        default: begin end
         CSR_MSTATUS: begin
                         mstatus_next = csrWrite;
                         //Hardwired fields
@@ -156,8 +155,8 @@ module csrUnit
                         // mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
-                        // mip_next = csrWrite & 32'h000;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts
-                      end
+                        // mip_next = csrWrite & 32'h000;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts end
+        end
         CSR_MIE:      begin
                         mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
                       end
@@ -173,7 +172,10 @@ module csrUnit
         CSR_MTVAL:    begin
                         mtval_next = csrWrite;
                       end
-        //default: ;
+        default: begin
+           $display("unknown CSR: %p", address_i);
+           $stop();
+        end
       endcase
 
     end
@@ -204,11 +206,9 @@ module csrUnit
     // Timer Exception detect
     ////////////////////////////
     // Raise mtime pending interrupt bit if interrupt enabled and timer overflowed
-    if (mstatus_reg.mie && mie_reg.mtie) begin
-      if (mtime_reg >= mtimecmp_reg) begin
+     if (mtime_reg >= mtimecmp_reg) begin
         mip_next.mtip = 1;
-      end
-    end
+     end
 
     //////////////////////////////////////////////////////
     // Manage exceptions conditions to write to registers that need to be written
@@ -219,15 +219,16 @@ module csrUnit
       mepc_next = pc_i;                                            // Save actual pc
       mcause_next = excCause_i;      // Register exception cause.
       mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
-    end
+       mstatus_next.mie = 0;
 
+    end
   end : write_logic
 
 
   always_ff @ (posedge clk) begin
       if(rst) begin
         mstatus_reg   <= '0;
-        mtvec_reg <= HARDCODED_MTVEC; // Two LSBs hardwired to zero
+         mtvec_reg <= '0; // Two LSBs hardwired to zero
         mip_reg       <= '0;
         mie_reg       <= '0;
         mscratch_reg  <= '0;
@@ -250,7 +251,4 @@ module csrUnit
         mtimecmp_reg  <= mtimecmp_next;
       end
   end
-
-
-
 endmodule

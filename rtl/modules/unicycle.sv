@@ -243,7 +243,6 @@ module unicycle(
                         .pc_i            (pc_o),
                         .dataAddress_i   (alu_result),
                         .memInstType_i   (control_out.instType),
-                        .mie_i(mie),
                         .jumpingToMtvec_i(jumpToMtvec),
                         .inst_invalid_i  (control_out.inst_invalid),
                         .priv_i          (control_out.inst_priv),
