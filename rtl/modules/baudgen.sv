@@ -2,7 +2,7 @@ import Common::*;
 
 // baudrate 9600 -> 1041.5 counts
 
-module baudGen #(parameter baudRate = 10)
+module baudGen #(parameter baudRate = 1085)
   (input logic clk,rst,
   input logic e_baudrate,
   output logic clk_baud

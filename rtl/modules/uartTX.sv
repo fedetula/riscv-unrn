@@ -26,6 +26,7 @@ always_ff @(posedge clk) begin
 	end
 end
 
+//logica de transicion
 always_comb begin
   next_state = reg_state; 
   load = 0;

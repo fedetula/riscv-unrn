@@ -1,5 +1,5 @@
 //Falta agregar instrucciones fence y priviliged a la funcion getName, y ver donde mas agregar cosas
-import riscV_unrn_pkg::*;
+//import riscV_unrn_pkg::*;
 
 package Common;
 
@@ -7,6 +7,7 @@ package Common;
 
    typedef logic[4:0] regId_t;
    typedef logic [31:0] uint32;
+   typedef logic [7:0] uint8;
    typedef logic signed [31:0] int32_t;
    typedef logic [4:0]  opcode_t;
    typedef logic [31:0] raw_instr_t;
@@ -62,7 +63,7 @@ package Common;
     }mem_inst_type_t;
 
    /*----------ESTRUCTURAS-----------*/
-
+   /* 
    typedef struct packed {
 						  opcode_t opcode;
 						  // logic [31:0]      imm;
@@ -91,7 +92,7 @@ package Common;
       logic             excRequest;
       logic             excRet;
       uint32            excCause;
-	  } control_out_t;
+	  } control_out_t;*/
 
 
    /*---------FUNCIONES----------*/

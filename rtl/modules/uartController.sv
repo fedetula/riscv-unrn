@@ -15,6 +15,7 @@ module uartController
 logic [2:0] cant_tx;
 logic [1:0] indice1_tx,indice2_tx;
 logic status_fifo_tx;
+logic doTX;
 uint8 fifo_tx [4];
 uint32 registerTX;
 
@@ -54,32 +55,16 @@ end
 always_comb begin
   e_busTX = 0;
   tx_data = 0;
+  doTX = 0;
   case(reg_state)
     idle:begin
-    if(cant_tx>0) begin
+    if(cant_tx!=0) begin
       e_busTX = 1;
+      doTX = 1;
     end
     end
     transmit: begin
-//      e_busTX = 1;
       tx_data = fifo_tx[indice2_tx];
-      if(busy_tx==0) begin
-        cant_tx = cant_tx-1;
-        case(indice2_tx)
-          0:begin
-            indice2_tx = 1;
-          end
-          1:begin
-            indice2_tx = 2;
-          end
-          2:begin
-            indice2_tx = 3;
-          end
-          3:begin
-            indice2_tx = 0;
-          end
-         endcase
-      end
     end
   endcase
 end
@@ -96,8 +81,31 @@ always_ff @(posedge clk) begin
     indice2_tx<=0;
     fifo_tx <= '{default:0};
     cant_tx <=0;
+    registerTX <= 0;
   end
+  else if(e_write && !registerTX[31]) begin
+        registerTX<= {1'b1,w_data[30:0]};
+  end
+  else if(doTX)
+    cant_tx <= cant_tx-1;
   else if(!status_fifo_tx && registerTX[31]) begin
+    if(reg_state==transmit && busy_tx==0) begin
+        case(indice2_tx)
+          0:begin
+            indice2_tx <= 1;
+          end
+          1:begin
+            indice2_tx <= 2;
+          end
+          2:begin
+            indice2_tx <= 3;
+          end
+          3:begin
+            indice2_tx <= 0;
+          end
+         endcase 
+    end
+    else begin
     case(indice1_tx)
       0:begin
             fifo_tx[0] <= registerTX;
@@ -124,23 +132,8 @@ always_ff @(posedge clk) begin
           registerTX<=registerTX & 32'h7fffffff;
       end
     endcase
+    end
   end
-end
-
-
-//-----REGISTER TX-----
-always_ff @(posedge clk) begin
-    if(rst)begin
-        registerTX <= 0;
-    end
-    else if(e_write && !registerTX[31]) begin
-//        if(status_fifo_tx) begin
-          registerTX<= {1'b1,w_data[30:0]};
-//        end
-//        else begin
-//          registerTX <= {1'b1,w_data[30:0]};
-//        end
-    end
 end
 
 assign r_data = (e_read) ? registerTX : {1'b1,31'b0};
