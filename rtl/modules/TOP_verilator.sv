@@ -48,6 +48,8 @@ module TOP_verilator(
    assign probe_bus_cmd.write_data = probe_write_data;
    assign probe_read_data = probe_bus_result;
 
+   logic                                memory_write_enable;
+
 //Bus
    MasterBusMux #(.TCmd(MemoryBus::Cmd),
                   .TResult(MemoryBus::Result))
@@ -108,7 +110,6 @@ ControllerMem controllerMem(.address(addressCpu_o[1:0]),
 
    DataMem #(.WIDTH(16))
    data_mem(.clk,
-            //.rst(rst_platform),
             .write_enable(data_bus_write_enable),
             .bus_address(data_bus_address),
             .membuscmd(data_bus_cmd),

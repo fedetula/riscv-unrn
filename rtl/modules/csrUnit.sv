@@ -20,7 +20,6 @@ module csrUnit
   output logic            mtime_exc_o, // We have an exception if enabled
   output logic [31:0]     mtvec_o, // Trap Vector output
   output logic [31:0]     mepc_o,
-  output logic            mie_o,
   // Timers
   input logic [31:0]      mtimeData_i,
   input logic             mtimeWe_i,
@@ -54,7 +53,6 @@ module csrUnit
   assign data_o = csrRead;
   assign mtvec_o = mtvec_reg;
   assign mepc_o = mepc_reg;
-  assign mie_o = mstatus_reg.mie;
 
   // Check if enabled and pending interrupt match, for mtime interrupt
   assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.mtie && mip_reg.mtip): 1'b0;

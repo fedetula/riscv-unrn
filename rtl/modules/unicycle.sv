@@ -206,9 +206,6 @@ module unicycle(
     logic [31:0] trapInfo;
     logic [31:0] excCause;
 
-   logic         mie;
-
-
     csrUnit csrs(
                 .clk           (clk),
                 .rst           (rst),
@@ -220,7 +217,6 @@ module unicycle(
                 .jumpingToMtvec_i(jumpToMtvec),
                 .excCause_i    (excCause),
                 .trapInfo_i    (trapInfo),
-                 .mie_o(mie),
                 .mtime_exc_o   (mtime_exc),
                 .mtvec_o       (mtvec),
                 .mepc_o        (mepc),
@@ -237,13 +233,11 @@ module unicycle(
     assign exception_o = exceptionPresent;
     //Todavia no terminado revisar luego de finalizado las conexiones
     excDetect excDetect(
-                        .clk,
                         .shouldJump_i(isJump),
                         .pcJumpDst_i(PC_JumpDst),
                         .pc_i            (pc_o),
                         .dataAddress_i   (alu_result),
                         .memInstType_i   (control_out.instType),
-                        .jumpingToMtvec_i(jumpToMtvec),
                         .inst_invalid_i  (control_out.inst_invalid),
                         .priv_i          (control_out.inst_priv),
                         .privCause_i     (control_out.excCause),

@@ -8,7 +8,6 @@ module ALU
    );
 
    uint32 xor_result;
-   uint32 sub_result;
    logic reduction;
    logic less;
 

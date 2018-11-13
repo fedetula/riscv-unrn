@@ -3,14 +3,12 @@ import riscV_unrn_pkg::*;
 
 
 module excDetect(
-                 input logic         clk,
                  input               shouldJump_i,
                  input logic [31:0]  pcJumpDst_i,
                  input logic [31:0]  pc_i,
                  input logic [31:0]  dataAddress_i,
                  input               mem_inst_type_t memInstType_i,
                 //input opcode_t      opcode_i,
-                 input logic         jumpingToMtvec_i,
                  input logic         inst_invalid_i,
                  input logic         priv_i,
                  input logic [31:0]  privCause_i,
