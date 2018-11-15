@@ -24,8 +24,8 @@ module csrUnit
   input logic [31:0]      mtimeData_i,
   input logic             mtimeWe_i,
   input logic [31:0]      mtimeAddress_i,
-  output logic [31:0]     mtimeData_o
-
+  output logic [31:0]     mtimeData_o,
+  output logic [31:0]     mtime_debug_o
   );
 
   //////////////////////////
@@ -73,6 +73,8 @@ module csrUnit
 
   csr_raw64_t   mtime_reg, mtime_next;
   csr_raw64_t   mtimecmp_reg, mtimecmp_next;
+
+   assign mtime_debug_o = mtime_reg[31:0];
 
   ////////////////////
   // Actual Registers

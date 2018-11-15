@@ -2,16 +2,17 @@ import Common::*;
 //import Control::*;
 
 module unicycle(
-                input logic clk,
-                input logic rst,
+                input logic  clk,
+                input logic  rst,
                 //Memory Interface
-                output mem_inst_type_t  instType_o,
-                output uint32           writeData_o,
-                output uint32           dataAddress_o,
-                input  uint32           readData_i,
-                output uint32           pc_o,
-                input  raw_instr_t      instruction_i,
-                output logic            exception_o
+                output       mem_inst_type_t instType_o,
+                output       uint32 writeData_o,
+                output       uint32 dataAddress_o,
+                input        uint32 readData_i,
+                output       uint32 pc_o,
+                input        raw_instr_t instruction_i,
+                output logic exception_o,
+                output uint32 mtime_debug_o
                 );
 
     /////////////////////
@@ -223,7 +224,8 @@ module unicycle(
                 .mtimeData_i   (reg_file_read_data2),
                 .mtimeWe_i     (mtimeWe),
                 .mtimeAddress_i(alu_result),
-                .mtimeData_o   (mtimeData)
+                .mtimeData_o   (mtimeData),
+                 .mtime_debug_o
     );
 
     ////////////////////

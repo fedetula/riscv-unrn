@@ -1,19 +1,20 @@
 import Common::*;
 import MemoryBus::*;
 
-module TOP_verilator(
-                     input logic        clk,
-                     input logic        rst_cpu,
-                     input logic        rst_platform,
-                     input logic        probe_mem,
+module TOP_verilator(input logic         clk,
+                     input logic         rst_cpu,
+                     input logic         rst_platform,
+                     input logic         probe_mem,
 
-                     input logic [29:0] probe_address,
-                     input logic        probe_mem_read, probe_mem_write,
-                     input logic [3:0]  probe_mask_byte,
-                     input              uint32 probe_write_data,
-                     output             uint32 probe_read_data,
-                     output logic [7:0] uart_data,
-                     output logic       uart_write
+                     input logic [29:0]  probe_address,
+                     input logic         probe_mem_read, probe_mem_write,
+                     input logic [3:0]   probe_mask_byte,
+                     input               uint32 probe_write_data,
+                     output              uint32 probe_read_data,
+                     output logic [7:0]  uart_data,
+                     output logic        uart_write,
+                     output logic [31:0] pc_o,
+                     output logic [31:0] mtime_o
                      );
 
    logic                                invalid_bus_address;
@@ -119,7 +120,7 @@ ControllerMem controllerMem(.address(addressCpu_o[1:0]),
             );
 //Core
 
-assign cpu_bus_address = addressCpu_o[31:2];
+   assign cpu_bus_address = addressCpu_o[31:2];
 
    Common::mem_inst_type_t instType_cpu;
    Common::uint32 addressCpu_o;
@@ -135,7 +136,10 @@ assign cpu_bus_address = addressCpu_o[31:2];
                      .writeData_o(cpu_bus_cmd.write_data),
                      .dataAddress_o(addressCpu_o),
                      .exception_o(exception),
-                     .pc_o(pc)
+                     .pc_o(pc),
+                     .mtime_debug_o(mtime_o)
                      );
+   assign pc_o = pc;
+
 
 endmodule; // TOP_verilator

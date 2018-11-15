@@ -57,7 +57,11 @@ assign  trapInfo_o = trapInfo;
     end
     // Invalid memory access
     else if (memInstType_i[3]) begin
-            if (dataAddress_i != 'h100 &&  ((dataAddress_i < MEM_VALID_RANGE_BASE) || (dataAddress_i > MEM_VALID_RANGE_LIMIT)) ) begin
+           if (dataAddress_i != 'h100
+               && ~((dataAddress_i < MEM_VALID_RANGE_BASE)
+                 || (dataAddress_i > MEM_VALID_RANGE_LIMIT))
+               &&  ~((dataAddress_i < MTIME_MEM_ADDRESS_LOW)
+                     || (dataAddress_i > MTIMECMP_MEM_ADDRESS_HIGH))) begin
           excPresent = 1;
           case (memInstType_i)
             default: begin end
@@ -65,8 +69,8 @@ assign  trapInfo_o = trapInfo;
             MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
           endcase
           trapInfo = dataAddress_i;
-        end else  begin
-           trapInfo = dataAddress_i;
+       end else  begin
+          trapInfo = dataAddress_i;
            case (dataAddress_i[1:0])
              1: begin
                 case (memInstType_i)
