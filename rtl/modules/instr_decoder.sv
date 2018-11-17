@@ -4,13 +4,14 @@ module instr_decoder (input Common::raw_instr_t raw_instr_i,
                       output Common::decoded_instr_t instr_o,
                       output logic [31:0] imm_o);
 
+    /* synthesis syn_romstyle="block_rom" */
     instr_type_t instr_type;
     logic [4:0] opcode;
     assign opcode = raw_instr_i[6:2];
 
     always_comb begin
-        instr_type = instr_type_R;
-        case (opcode)
+        instr_type = instr_type_I;
+        unique case (opcode)
           5'b00000: instr_type = instr_type_I;//RiscV32I
           5'b00011: instr_type = instr_type_I;//RiscV32I
           5'b00100: instr_type = instr_type_I;//RiscV32I
