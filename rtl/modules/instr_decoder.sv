@@ -29,10 +29,10 @@ module instr_decoder (input Common::raw_instr_t raw_instr_i,
     end
 
     always_comb begin
-        instr_o = 0;
+        instr_o = 'x;
         instr_o.opcode = opcode;
-        imm_o = 0;
-        case (instr_type)
+        imm_o = 'x;
+        unique case (instr_type)
             instr_type_I: begin
                 imm_o = 32'(signed'(raw_instr_i[31:20]));
                 instr_o.rs1 = raw_instr_i[19:15];

@@ -55,6 +55,7 @@ module unicycle(
         //Logica para PC_next
         pc_next_t pcSource;
         isJump = 0;
+        PC_JumpDst = 'x;
 
         if(control_out.is_branch & alu_result[0]) begin
             isJump = 1;
