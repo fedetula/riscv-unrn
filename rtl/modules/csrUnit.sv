@@ -228,7 +228,7 @@ module csrUnit
   always_ff @ (posedge clk) begin
       if(rst) begin
         mstatus_reg   <= '0;
-         mtvec_reg <= '0; // Two LSBs hardwired to zero
+        mtvec_reg     <= '0; // Two LSBs hardwired to zero
         mip_reg       <= '0;
         mie_reg       <= '0;
         mscratch_reg  <= '0;

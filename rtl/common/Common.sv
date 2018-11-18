@@ -14,13 +14,13 @@ package Common;
 
 /*-----------TYPEDEF ENUM----------*/
 
-   typedef enum         {
-                       instr_type_R,
-                       instr_type_I,
-                       instr_type_S,
-                       instr_type_SB,
-                       instr_type_U,
-                       instr_type_UJ
+   typedef enum logic [5:0] {
+                             instr_type_R = 'b1,
+                             instr_type_I = 'b10,
+                             instr_type_S =  'b100,
+                             instr_type_SB ='b1000,
+                             instr_type_U =  'b10000,
+                             instr_type_UJ = 'b100000
                        } instr_type_t;
 
    typedef enum	logic [3:0] {
@@ -51,14 +51,14 @@ package Common;
 
 
     typedef enum logic [3:0]{
-       MEM_LB =  4'b1000,
-       MEM_LH =  4'b1001,
-       MEM_LW =  4'b1010,
-       MEM_LBU = 4'b1011,
-       MEM_SB =  4'b1100,
-       MEM_SH =  4'b1101,
-       MEM_SW =  4'b1110,
-       MEM_LHU = 4'b1111,
+       MEM_LB =  4'b1110,
+       MEM_LH =  4'b1010,
+       MEM_LW =  4'b1100,
+       MEM_LBU = 4'b1111,
+       MEM_LHU = 4'b1011,
+       MEM_SB =  4'b0110,
+       MEM_SH =  4'b0010,
+       MEM_SW =  4'b0100,
        MEM_NOP = 4'b0000
     }mem_inst_type_t;
 

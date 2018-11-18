@@ -5,8 +5,10 @@ module control_unit (input Common::decoded_instr_t instr_i,
                      output Common::control_out_t control_o);
 
     always_comb begin
-        control_o = 0;
-        case (instr_i.opcode)
+       control_o = 'x;
+       control_o.instType = MEM_NOP;
+
+       unique case (instr_i.opcode)
             5'b00000: begin //LOAD'S
                 control_o.mem_to_reg = 1;
                 control_o.alu_from_imm = 1;

@@ -28,8 +28,8 @@ assign  trapInfo_o = trapInfo;
 
   always_comb begin
     excPresent = 0;
-    excCause = 0;     //TODO: Verify this default values
-    trapInfo = 0;     //TODO: Verify this default values
+    excCause = 'x;     //TODO: Verify this default values
+    trapInfo = 'x;     //TODO: Verify this default values
 
     // Misaligned PC
     if (shouldJump_i && pcJumpDst_i[1:0] != 2'b00) begin
@@ -38,7 +38,7 @@ assign  trapInfo_o = trapInfo;
         trapInfo = pcJumpDst_i;
     end
     // Invalid PC
-    else if ((pc_i < PC_VALID_RANGE_BASE) || (pc_i > PC_VALID_RANGE_LIMIT) ) begin
+    else if (pc_i[31:RAM_WIDTH] != PC_VALID_RANGE_BASE[31:RAM_WIDTH]) begin
         excPresent = 1;
         excCause = M_INSTR_AFAULT;
         trapInfo = pc_i;
@@ -56,14 +56,14 @@ assign  trapInfo_o = trapInfo;
        trapInfo = pc_i;
     end
     // Invalid memory access
-    else if (memInstType_i[3]) begin
+    else if (|memInstType_i) begin
            if (dataAddress_i != 'h100
-               && ~((dataAddress_i < MEM_VALID_RANGE_BASE)
-                 || (dataAddress_i > MEM_VALID_RANGE_LIMIT))
-               &&  ~((dataAddress_i < MTIME_MEM_ADDRESS_LOW)
+               && (dataAddress_i[31:riscV_unrn_pkg::RAM_WIDTH] != PC_VALID_RANGE_BASE[31:riscV_unrn_pkg::RAM_WIDTH])
+               && ((dataAddress_i < MTIME_MEM_ADDRESS_LOW)
                      || (dataAddress_i > MTIMECMP_MEM_ADDRESS_HIGH))) begin
+              $display("%b %b %h", dataAddress_i[31:riscV_unrn_pkg::RAM_WIDTH] , PC_VALID_RANGE_BASE[31:riscV_unrn_pkg::RAM_WIDTH], dataAddress_i);
           excPresent = 1;
-          case (memInstType_i)
+          unique case (memInstType_i)
             default: begin end
             MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = M_LOAD_AFAULT;
             MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
@@ -73,7 +73,7 @@ assign  trapInfo_o = trapInfo;
           trapInfo = dataAddress_i;
            case (dataAddress_i[1:0])
              1: begin
-                case (memInstType_i)
+                unique case (memInstType_i)
                   default: begin end
                   MEM_LH,MEM_LW,MEM_LHU: begin
                      excPresent = 1;
@@ -86,7 +86,7 @@ assign  trapInfo_o = trapInfo;
                 endcase
              end
              2: begin
-                case (memInstType_i)
+                unique case (memInstType_i)
                   default: begin end
                   MEM_LW: begin
                      excPresent = 1;
@@ -99,7 +99,7 @@ assign  trapInfo_o = trapInfo;
                 endcase
              end
              3: begin
-                case (memInstType_i)
+                unique case (memInstType_i)
                   default: begin end
                   MEM_LH,MEM_LW,MEM_LHU: begin
                      excPresent = 1;

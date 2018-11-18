@@ -72,7 +72,7 @@ module TOP_verilator(input logic         clk,
    SlaveBusMux #(.TCmd(MemoryBus::Cmd),
                  .TResult(MemoryBus::Result),
                  .Base1(PC_VALID_RANGE_BASE),
-                 .Size1(2**16),
+                 .Size1(2**riscV_unrn_pkg::RAM_WIDTH),
                  .Base2('h100),
                  .Size2(2**2))
    slave_bus(
@@ -109,7 +109,7 @@ ControllerMem controllerMem(.address(addressCpu_o[1:0]),
    uint32 pc;
    uint32 instruction;
 
-   DataMem #(.WIDTH(16))
+   DataMem #(.WIDTH(riscV_unrn_pkg::RAM_WIDTH))
    data_mem(.clk,
             .write_enable(data_bus_write_enable),
             .bus_address(data_bus_address),
