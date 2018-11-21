@@ -3,7 +3,6 @@ import MemoryBus::*;
 
 module TOP_verilator(input logic         clk,
                      input logic         rst_cpu,
-                     input logic         rst_platform,
                      input logic         probe_mem,
 
                      input logic [29:0]  probe_address,
@@ -17,25 +16,23 @@ module TOP_verilator(input logic         clk,
                      output logic [31:0] mtime_o
                      );
 
-   logic                                invalid_bus_address;
-
-   logic [29:0]                         cpu_bus_address;
-   logic                                cpu_mem_write;
-   logic                                data_bus_write_enable;
+   logic [29:0]                          cpu_bus_address;
+   logic                                 cpu_mem_write;
+   logic                                 data_bus_write_enable;
 
    MemoryBus::Cmd cpu_bus_cmd;
    MemoryBus::Result cpu_bus_result;
    MemoryBus::Cmd probe_bus_cmd;
    MemoryBus::Result probe_bus_result;
-   logic [29:0]                         memory_bus_address;
+   logic [29:0]                          memory_bus_address;
    MemoryBus::Cmd memory_bus_cmd;
    MemoryBus::Result memory_bus_result;
 
-   logic [29:0]                         data_bus_address;
+   logic [29:0]                          data_bus_address;
    MemoryBus::Cmd data_bus_cmd;
    MemoryBus::Result data_bus_result;
 
-   logic [29:0]                         uart_bus_address;
+   logic [29:0]                          uart_bus_address;
    MemoryBus::Cmd uart_bus_cmd;
    MemoryBus::Result uart_bus_result;
 
@@ -49,9 +46,9 @@ module TOP_verilator(input logic         clk,
    assign probe_bus_cmd.write_data = probe_write_data;
    assign probe_read_data = probe_bus_result;
 
-   logic                                memory_write_enable;
+   logic                                 memory_write_enable;
 
-//Bus
+   //Bus
    MasterBusMux #(.TCmd(MemoryBus::Cmd),
                   .TResult(MemoryBus::Result))
    master_bus(.useA(probe_mem),
@@ -71,7 +68,7 @@ module TOP_verilator(input logic         clk,
 
    SlaveBusMux #(.TCmd(MemoryBus::Cmd),
                  .TResult(MemoryBus::Result),
-                 .Base1(PC_VALID_RANGE_BASE),
+                 .Base1(riscV_unrn_pkg::PC_VALID_RANGE_BASE),
                  .Size1(2**riscV_unrn_pkg::RAM_WIDTH),
                  .Base2('h100),
                  .Size2(2**2))
@@ -80,7 +77,6 @@ module TOP_verilator(input logic         clk,
              .we_in(memory_write_enable),
              .cmd_in(memory_bus_cmd),
              .result_out(memory_bus_result),
-             .invalid_address(invalid_bus_address),
              .address_1(data_bus_address),
              .we_1(data_bus_write_enable),
              .cmd_1(data_bus_cmd),
@@ -90,47 +86,43 @@ module TOP_verilator(input logic         clk,
              .cmd_2(uart_bus_cmd),
              .result_2(uart_bus_result));
 
-//Memory Interface
-   logic                                exception;
+   //Memory Interface
+   logic                                 exception;
 
-ControllerMem controllerMem(.address(addressCpu_o[1:0]),
-                            .dataMemOut(cpu_bus_result),
-                            .instType(instType_cpu),
-                            .exception(exception),
-                            .dataRead(cpu_data_result),
-                            .maskByte(cpu_bus_cmd.mask_byte),
-                            .read(cpu_bus_cmd.mem_read),
-                            .write(cpu_mem_write)
-                            );
+   ControllerMem controllerMem(.address(addressCpu_o[1:0]),
+                               .dataMemOut(cpu_bus_result),
+                               .instType(instType_cpu),
+                               .exception(exception),
+                               .dataRead(cpu_data_result),
+                               .maskByte(cpu_bus_cmd.mask_byte),
+                               .read(cpu_bus_cmd.mem_read),
+                               .write(cpu_mem_write)
+                               );
 
 
-//Memory
+   //Memory
 
    uint32 pc;
-   uint32 instruction;
 
    DataMem #(.WIDTH(riscV_unrn_pkg::RAM_WIDTH))
    data_mem(.clk,
             .write_enable(data_bus_write_enable),
-            .bus_address(data_bus_address),
+            .bus_address(data_bus_address[riscV_unrn_pkg::RAM_WIDTH-2-1:0]),
             .membuscmd(data_bus_cmd),
-            .membusres(data_bus_result),
-            .pc(pc),
-            .instruction(instruction)
+            .membusres(data_bus_result)
             );
-//Core
+   //Core
 
    assign cpu_bus_address = addressCpu_o[31:2];
 
-   Common::mem_inst_type_t instType_cpu;
-   Common::uint32 addressCpu_o;
+   mem_inst_type_t instType_cpu;
+   uint32 addressCpu_o;
 
    unicycle unicycle(
                      //INPUTS
                      .clk,
                      .rst(rst_cpu),
                      .readData_i(cpu_data_result),
-                     .instruction_i(instruction),
                      //OUTPUS
                      .instType_o(instType_cpu),
                      .writeData_o(cpu_bus_cmd.write_data),

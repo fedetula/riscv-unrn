@@ -9,9 +9,9 @@ module RegFile(
                output      uint32 read_data1, read_data2
 			   );
 
-  uint32 registers[32];
-  regId_t addr1_reg;
-  regId_t addr2_reg;
+   uint32 registers[32];
+   regId_t addr1_reg;
+   regId_t addr2_reg;
 
 always_comb begin
    read_data1 = registers[addr1_reg];

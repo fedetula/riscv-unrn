@@ -10,7 +10,6 @@ module SlaveBusMux #(type TCmd = logic,
     input logic         we_in,
     input               TCmd cmd_in,
     output              TResult result_out,
-    output logic        invalid_address,
     // == hw 1 ==
     output logic [29:0] address_1,
     output logic         we_1,
@@ -27,7 +26,6 @@ module SlaveBusMux #(type TCmd = logic,
    localparam LogSize2 = $clog2(Size2);
 
    always_comb begin
-      invalid_address = 0;
       cmd_1 = '{default: 0};
       cmd_2 = '{default: 0};
       we_1 = 0;
@@ -47,7 +45,6 @@ module SlaveBusMux #(type TCmd = logic,
          we_2 = we_in;
          address_2[LogSize2-1:0] = address_in[LogSize2-1:0];
       end else begin
-        invalid_address = 1;
       end
    end
 endmodule

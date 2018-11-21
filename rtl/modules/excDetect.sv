@@ -1,5 +1,4 @@
 import Common::*;
-import riscV_unrn_pkg::*;
 
 
 module excDetect(
@@ -34,19 +33,19 @@ assign  trapInfo_o = trapInfo;
     // Misaligned PC
     if (shouldJump_i && pcJumpDst_i[1:0] != 2'b00) begin
         excPresent = 1;
-        excCause = M_INSTR_MISALIGN;
+        excCause = riscV_unrn_pkg::M_INSTR_MISALIGN;
         trapInfo = pcJumpDst_i;
     end
     // Invalid PC
-    else if (pc_i[31:RAM_WIDTH] != PC_VALID_RANGE_BASE[31:RAM_WIDTH]) begin
+    else if (pc_i[31:riscV_unrn_pkg::RAM_WIDTH] != riscV_unrn_pkg::PC_VALID_RANGE_BASE[31:riscV_unrn_pkg::RAM_WIDTH]) begin
         excPresent = 1;
-        excCause = M_INSTR_AFAULT;
+        excCause = riscV_unrn_pkg::M_INSTR_AFAULT;
         trapInfo = pc_i;
     end
     // Invalid Instruction
     else if (inst_invalid_i) begin
       excPresent = 1;
-      excCause = M_ILL_INSTR;
+      excCause = riscV_unrn_pkg::M_ILL_INSTR;
       trapInfo = pc_i;
     end
      // Privilieged instruction
@@ -58,15 +57,14 @@ assign  trapInfo_o = trapInfo;
     // Invalid memory access
     else if (|memInstType_i) begin
            if (dataAddress_i != 'h100
-               && (dataAddress_i[31:riscV_unrn_pkg::RAM_WIDTH] != PC_VALID_RANGE_BASE[31:riscV_unrn_pkg::RAM_WIDTH])
-               && ((dataAddress_i < MTIME_MEM_ADDRESS_LOW)
-                     || (dataAddress_i > MTIMECMP_MEM_ADDRESS_HIGH))) begin
-              $display("%b %b %h", dataAddress_i[31:riscV_unrn_pkg::RAM_WIDTH] , PC_VALID_RANGE_BASE[31:riscV_unrn_pkg::RAM_WIDTH], dataAddress_i);
+               && (dataAddress_i[31:riscV_unrn_pkg::RAM_WIDTH] != riscV_unrn_pkg::PC_VALID_RANGE_BASE[31:riscV_unrn_pkg::RAM_WIDTH])
+               && ((dataAddress_i < riscV_unrn_pkg::MTIME_MEM_ADDRESS_LOW)
+                     || (dataAddress_i > riscV_unrn_pkg::MTIMECMP_MEM_ADDRESS_HIGH))) begin
           excPresent = 1;
           unique case (memInstType_i)
             default: begin end
-            MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = M_LOAD_AFAULT;
-            MEM_SB, MEM_SH, MEM_SW:                 excCause = M_STORE_AFAULT;
+            MEM_LB, MEM_LH, MEM_LW, MEM_LBU, MEM_LHU: excCause = riscV_unrn_pkg::M_LOAD_AFAULT;
+            MEM_SB, MEM_SH, MEM_SW:                 excCause = riscV_unrn_pkg::M_STORE_AFAULT;
           endcase
           trapInfo = dataAddress_i;
        end else  begin
@@ -77,11 +75,11 @@ assign  trapInfo_o = trapInfo;
                   default: begin end
                   MEM_LH,MEM_LW,MEM_LHU: begin
                      excPresent = 1;
-                     excCause = M_LOAD_MISALIGN;
+                     excCause = riscV_unrn_pkg::M_LOAD_MISALIGN;
                   end
                   MEM_SH, MEM_SW:        begin
                      excPresent = 1;
-                     excCause = M_STORE_MISALIGN;
+                     excCause = riscV_unrn_pkg::M_STORE_MISALIGN;
                   end
                 endcase
              end
@@ -90,11 +88,11 @@ assign  trapInfo_o = trapInfo;
                   default: begin end
                   MEM_LW: begin
                      excPresent = 1;
-                     excCause = M_LOAD_MISALIGN;
+                     excCause = riscV_unrn_pkg::M_LOAD_MISALIGN;
                   end
                   MEM_SW:        begin
                      excPresent = 1;
-                     excCause = M_STORE_MISALIGN;
+                     excCause = riscV_unrn_pkg::M_STORE_MISALIGN;
                   end
                 endcase
              end
@@ -103,11 +101,11 @@ assign  trapInfo_o = trapInfo;
                   default: begin end
                   MEM_LH,MEM_LW,MEM_LHU: begin
                      excPresent = 1;
-                     excCause = M_LOAD_MISALIGN;
+                     excCause = riscV_unrn_pkg::M_LOAD_MISALIGN;
                   end
                   MEM_SH, MEM_SW:        begin
                      excPresent = 1;
-                     excCause = M_STORE_MISALIGN;
+                     excCause = riscV_unrn_pkg::M_STORE_MISALIGN;
                   end
                 endcase
              end
@@ -123,7 +121,7 @@ assign  trapInfo_o = trapInfo;
     end
     else if (mtime_exc_i) begin
        excPresent = 1;
-       excCause = M_TIMER_INT;
+       excCause = riscV_unrn_pkg::M_TIMER_INT;
     end
   end
 endmodule

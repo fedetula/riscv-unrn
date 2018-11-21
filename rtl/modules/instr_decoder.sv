@@ -1,13 +1,23 @@
 import Common::*;
 
-module instr_decoder (input Common::raw_instr_t raw_instr_i,
-                      output Common::decoded_instr_t instr_o,
+module instr_decoder (input clk,
+                      input store_imm,
+                      input               raw_instr_t raw_instr_i,
+                      output              decoded_instr_t instr_o,
                       output logic [31:0] imm_o);
 
     /* synthesis syn_romstyle="block_rom" */
-    instr_type_t instr_type;
-    logic [4:0] opcode;
-    assign opcode = raw_instr_i[6:2];
+   instr_type_t instr_type;
+   logic [4:0]                            opcode;
+   assign opcode = raw_instr_i[6:2];
+
+   logic [31:0]                           imm_next;
+
+   always_ff @(posedge clk) begin
+      if (store_imm) begin
+         imm_o <= imm_next;
+      end
+   end
 
     always_comb begin
         instr_type = instr_type_I;
@@ -32,16 +42,16 @@ module instr_decoder (input Common::raw_instr_t raw_instr_i,
     always_comb begin
         instr_o = 'x;
         instr_o.opcode = opcode;
-        imm_o = 'x;
+        imm_next = 0;
         unique case (instr_type)
             instr_type_I: begin
-                imm_o = 32'(signed'(raw_instr_i[31:20]));
+                imm_next = 32'(signed'(raw_instr_i[31:20]));
                 instr_o.rs1 = raw_instr_i[19:15];
                 instr_o.funct3 = raw_instr_i[14:12];
                 instr_o.rd = raw_instr_i[11:7];
             end
             instr_type_U: begin
-                imm_o[31:12] = raw_instr_i[31:12];
+                imm_next[31:12] = raw_instr_i[31:12];
                 instr_o.rd = raw_instr_i[11:7];
             end
             instr_type_R: begin
@@ -52,31 +62,31 @@ module instr_decoder (input Common::raw_instr_t raw_instr_i,
                 instr_o.rd = raw_instr_i[11:7];
             end
             instr_type_S: begin
-                // imm_o[11:5] = raw_instr_i[31:25];
-                // imm_o[4:0] = raw_instr_i[11:7];
-                imm_o = 32'(signed'({raw_instr_i[31:25],raw_instr_i[11:7]}));
+                // imm_next[11:5] = raw_instr_i[31:25];
+                // imm_next[4:0] = raw_instr_i[11:7];
+                imm_next = 32'(signed'({raw_instr_i[31:25],raw_instr_i[11:7]}));
                 instr_o.rs2 = raw_instr_i[24:20];
                 instr_o.rs1 = raw_instr_i[19:15];
                 instr_o.funct3 = raw_instr_i[14:12];
             end
             instr_type_SB: begin
-                imm_o[12]= raw_instr_i[31];
-                imm_o[10:5] = raw_instr_i[30:25];
-                imm_o[4:1] = raw_instr_i[11:8];
-                imm_o[11]= raw_instr_i[7];
-                imm_o[0] = 0;
-                imm_o = 32'(signed'(imm_o[12:0]));
+                imm_next[12]= raw_instr_i[31];
+                imm_next[10:5] = raw_instr_i[30:25];
+                imm_next[4:1] = raw_instr_i[11:8];
+                imm_next[11]= raw_instr_i[7];
+                imm_next[0] = 0;
+                imm_next = 32'(signed'(imm_next[12:0]));
                 instr_o.rs2 = raw_instr_i[24:20];
                 instr_o.rs1 = raw_instr_i[19:15];
                 instr_o.funct3 = raw_instr_i[14:12];
             end
             instr_type_UJ: begin
-                imm_o[20]= raw_instr_i[31];
-                imm_o[10:1] = raw_instr_i[30:21];
-                imm_o[11]= raw_instr_i[20];
-                imm_o[19:12] = raw_instr_i[19:12];
-                imm_o[0] = 0;
-                imm_o = 32'(signed'(imm_o[20:0]));
+                imm_next[20]= raw_instr_i[31];
+                imm_next[10:1] = raw_instr_i[30:21];
+                imm_next[11]= raw_instr_i[20];
+                imm_next[19:12] = raw_instr_i[19:12];
+                imm_next[0] = 0;
+                imm_next = 32'(signed'(imm_next[20:0]));
                 instr_o.rd = raw_instr_i[11:7];
             end
             default: begin

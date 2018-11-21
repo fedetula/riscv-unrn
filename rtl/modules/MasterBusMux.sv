@@ -1,6 +1,5 @@
 import Common::*;
 
-
 module MasterBusMux
 #(type TCmd = logic,
   type TResult = logic)
