@@ -79,13 +79,14 @@ module unicycle(
                       .raw_instr_i (readData_i),
                       .store_imm(instr_decode),
                       .instr_o     (dec_instr),
-                      .imm_o       (immediate_val));
+                      .imm_o       (immediate_val)
+                      );
 
    // Control
 
    control_unit control(.clk,
                         .instr_i    (dec_instr),
-                        .imm_i      (immediate_val),
+                        .imm_i      (deco.imm_next),
                         .decode     (control_decode),
                         .control_o  (control_out));
 
@@ -185,7 +186,6 @@ module unicycle(
       data_mem_out = 0;
       jumpToMtvec = 0;
       mem_from_mtime = 0;
-      mepc = 0;
       mtimeData = 0;
       mtimeWe = 0;
       mtime_exc = 0;
@@ -208,7 +208,7 @@ module unicycle(
            stage_next = READ_REGS;
         end
         READ_REGS: begin
-           stage_next = ALU;
+           stage_next = control_out.excRequest ? CALC_NEXT_PC : ALU;
         end
         ALU: begin
            alu_control = control_out.alu_op;
@@ -271,37 +271,45 @@ module unicycle(
         CALC_NEXT_PC: begin
            alu_control = ALU_add;
 
-           if(control_out.is_jal) begin
-              shouldTakeJump_next = 1;
-              PC_JumpDst = alu_result;
-           end else if(control_out.is_jalr) begin
-              shouldTakeJump_next = 1;
-              PC_JumpDst = {alu_result[31:1], 1'b0};
-           end else if(control_out.is_branch & alu_result[0]) begin
-              shouldTakeJump_next = 1;
-              alu_data1 = PC_reg;
-              alu_data2 = immediate_val;
-              alu_start = 1;
-           end else if(control_out.excRet) begin
-              PC_next = mepc;
-           end else begin
-              alu_data1 = PC_reg;
-              alu_data2 = 4;
-              alu_start = 1;
-           end
+           if (control_out.excRequest) begin
+              jumpToMtvec = 1;
+              PC_next = mtvec;
+              stage_next = PC_FETCH;
+           end else  begin
+              if(control_out.is_jal) begin
+                 shouldTakeJump_next = 1;
+                 PC_JumpDst = alu_result;
+              end else if(control_out.is_jalr) begin
+                 shouldTakeJump_next = 1;
+                 PC_JumpDst = {alu_result[31:1], 1'b0};
+              end else if(control_out.is_branch & alu_result[0]) begin
+                 shouldTakeJump_next = 1;
+                 alu_data1 = PC_reg;
+                 alu_data2 = immediate_val;
+                 alu_start = 1;
+              end else if(control_out.excRet) begin
+                 PC_next = mepc;
+              end else begin
+                 alu_data1 = PC_reg;
+                 alu_data2 = 4;
+                 alu_start = 1;
+              end
 
-           if (alu_start) begin
-              stage_next = WAIT_ALU_PC;
-           end else if (~shouldTakeJump_next) begin
-              stage_next = PC_FETCH;
-           end else begin
-              stage_next = PC_FETCH;
-              excDetect_shouldJump = 1;
-              jumpToMtvec = control_out.excRequest || exceptionPresent;
-              if (jumpToMtvec) begin
-                 PC_next = mtvec;
-              end else  begin
-                 PC_next = PC_JumpDst;
+              if (alu_start) begin
+                 stage_next = WAIT_ALU_PC;
+              end else if (~shouldTakeJump_next) begin
+                 stage_next = PC_FETCH;
+              end else begin
+                 excDetect_shouldJump = 1;
+                 stage_next = PC_FETCH;
+                 if (exceptionPresent) begin
+                    jumpToMtvec = 1;
+                    PC_next = mtvec;
+                    stage_next = PC_FETCH;
+                 end else  begin
+                    PC_next = PC_JumpDst;
+                    stage_next = PC_FETCH;
+                 end
               end
            end
         end
@@ -313,8 +321,8 @@ module unicycle(
            PC_next = alu_result;
            if (shouldTakeJump_reg) begin
               excDetect_shouldJump = 1;
-              jumpToMtvec = control_out.excRequest || exceptionPresent;
-              if (jumpToMtvec) begin
+              if (exceptionPresent) begin
+                 jumpToMtvec = 1;
                  PC_next = mtvec;
               end
            end

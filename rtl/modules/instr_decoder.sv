@@ -1,17 +1,16 @@
 import Common::*;
 
 module instr_decoder (input clk,
-                      input store_imm,
+                      input               store_imm,
                       input               raw_instr_t raw_instr_i,
                       output              decoded_instr_t instr_o,
-                      output logic [31:0] imm_o);
+                      output logic [31:0] imm_o,
+                      output logic [31:0] imm_next);
 
     /* synthesis syn_romstyle="block_rom" */
    instr_type_t instr_type;
    logic [4:0]                            opcode;
    assign opcode = raw_instr_i[6:2];
-
-   logic [31:0]                           imm_next;
 
    always_ff @(posedge clk) begin
       if (store_imm) begin
