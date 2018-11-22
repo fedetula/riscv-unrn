@@ -236,7 +236,7 @@ module unicycle(
                      instType_o = MEM_NOP;        // Invalidate access to memory
                   end
            endcase
-           stage_next = WRITEBACK;
+           stage_next = control_out.reg_write ? WRITEBACK : CALC_NEXT_PC;
         end
         WRITEBACK: begin
            unique case (alu_result)
@@ -253,7 +253,7 @@ module unicycle(
            endcase
 
            dataAddress_o = alu_result;
-           instType_o = MEM_LW;
+           instType_o = control_out.instType;
            csr_op = control_out.csr_op;
            reg_file_we = control_out.reg_write & ~exceptionPresent;
            data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i;
