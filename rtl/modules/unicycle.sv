@@ -1,4 +1,5 @@
 import Common::*;
+import riscV_unrn_pkg::*;
 
 module unicycle(
                 input logic  clk,
@@ -170,7 +171,6 @@ module unicycle(
       instType_o = MEM_NOP;
       writeData_o = 0;
       dataAddress_o = 0;
-      exception_o = 0;
       // internal signals
       shouldTakeJump_next = 0;
       alu_control = ALU_add;
@@ -186,13 +186,11 @@ module unicycle(
       data_mem_out = 0;
       jumpToMtvec = 0;
       mem_from_mtime = 0;
-      mtimeData = 0;
       mtimeWe = 0;
-      mtime_exc = 0;
       reg_file_we = 0;
       reg_file_write_data = 0;
-      trapInfo = 0;
       PC_JumpDst = 0;
+      excDetect_shouldJump = 0;
 
       unique case (stage_reg)
         PC_FETCH: begin

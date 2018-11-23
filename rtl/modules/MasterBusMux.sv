@@ -21,7 +21,6 @@ module MasterBusMux
    always_comb begin
       busAResult = '{default:0};
       busBResult = '{default:0};
-      addressCommon = 0;
       if (useA) begin
          busAResult = busCommonResult;
       end else begin
