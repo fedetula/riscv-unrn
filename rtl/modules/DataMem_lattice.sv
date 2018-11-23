@@ -2,7 +2,7 @@ import riscV_unrn_pkg::*;
 import Common::*;
 import MemoryBus::*;
 
-module DataMem #(parameter WIDTH=10)
+module DataMem_lattice #(parameter WIDTH=10)
    (
     input logic  clk,rst,
     logic [13:0] bus_address,

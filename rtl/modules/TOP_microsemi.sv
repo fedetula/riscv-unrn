@@ -5,14 +5,18 @@ module TOP_microsemi(input logic         USER_BUTTON1,
                      output logic        FTDI_UART0_TXD
                      );
    logic clk;
+   logic uart_clk;
    logic rst_cpu;
    assign rst_cpu = USER_BUTTON1;
-module clock_generator(
-    // Outputs
-    .RCOSC_25_50MHZ_O2F(clk)
-);
-
    logic uart_tx_o;
+
+   // clock_gen
+   clock_gen(
+    // Outputs
+      .GL0(uart_clk),
+      .RCOSC_25_50MHZ_O2F(clk)
+   );
+
 
    logic [29:0]                          cpu_bus_address;
    logic                                 cpu_mem_write;
@@ -69,7 +73,7 @@ module clock_generator(
 
     //UART Instance
     uart #(.BAUDRATE(115200), .F_CLK(576000)) uart0(
-        .sys_clk_i      (clk),
+        .sys_clk_i      (uart_clk),
         .sys_rst_i      (rst_cpu),
         .uart_data_o    (uart_bus_result),
         .uart_tx_o      (uart_tx_o),
@@ -117,5 +121,4 @@ module clock_generator(
                      .pc_o(pc),
                      .mtime_debug_o(mtime_o)
                      );
-
 endmodule; // TOP_microsemi

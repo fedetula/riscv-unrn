@@ -1,0 +1,19 @@
+Microsemi Corporation - Microsemi Libero Software Release 11.9 SP1 (Version 11.9.1.0)
+
+Date      :  Fri Nov 23 13:03:34 2018
+Project   :  /home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero
+Component :  clock_gen
+Family    :  IGLOO2
+
+
+HDL source files for all Synthesis and Simulation tools:
+    /home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/component/work/clock_gen/FCCC_0/clock_gen_FCCC_0_FCCC.v
+    /home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/component/work/clock_gen/OSC_0/clock_gen_OSC_0_OSC.v
+    /home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/component/work/clock_gen/clock_gen.v
+
+HDL source files for Synopsys SynplifyPro Synthesis tool:
+    /home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/component/Actel/SgCore/OSC/2.0.101/osc_comps.v
+
+HDL source files for Mentor Precision Synthesis tool:
+    /home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/component/Actel/SgCore/OSC/2.0.101/osc_comps_pre.v
+

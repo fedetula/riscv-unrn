@@ -1,0 +1,7 @@
+DESIGN=TOP_microsemi
+DESDIR=/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/designer/TOP_microsemi
+TARGET_DIR=/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/designer/TOP_microsemi
+FAM=IGLOO2
+DIE=PA4MGL2500_N
+PACKAGE=vf256
+PDC_FILE=/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/libero/constraint/io/Creative_Rev1_IOs_def.pdc,,

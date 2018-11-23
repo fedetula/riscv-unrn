@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml-stylesheet type="text/xsl" href="drcss.xsl"?>
+<drcreport>
+  <header>clock_gen</header>
+  <drc>
+    <status>/usr/local/microsemi/Libero_SoC_v11.9/Libero/data/drcreport/warn.png</status>
+    <StatusMessage>Warning</StatusMessage>
+    <message>Floating Driver</message>
+    <detail>Floating output pin FCCC_0:LOCK</detail>
+    <crossprobe>liberoaction://cross_probe/smartdesign/clock_gen/pins/FCCC_0:LOCK</crossprobe>
+  </drc>
+</drcreport>

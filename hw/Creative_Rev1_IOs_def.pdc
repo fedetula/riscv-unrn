@@ -25,7 +25,7 @@
 
 #--- FPGA External 50Mhz Clock -------------------------------------------------
 
-set_io CLK_50M        \
+#set_io CLK_50M        \
 	-pinname H16        \
 	-fixed true         \
   -iostd LVCMOS33     \
@@ -59,7 +59,7 @@ set_io CLK_50M        \
 
 #--- User Pushbuttons I/O ------------------------------------------------------
 
-#set_io USER_BUTTON1   \
+set_io USER_BUTTON1   \
 	-pinname H12        \
 	-fixed true         \
   -iostd LVCMOS33     \
@@ -350,7 +350,7 @@ set_io CLK_50M        \
   -iostd LVCMOS33       \
 	-DIRECTION OUTPUT
 
-#set_io FTDI_UART0_TXD   \
+set_io FTDI_UART0_TXD   \
 	-pinname H3           \
 	-fixed true           \
   -iostd LVCMOS33       \
