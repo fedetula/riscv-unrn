@@ -4,54 +4,47 @@ import MemoryBus::*;
 module DataMem
   #(parameter WIDTH=10)
    (
-    input logic  clk,
-    // input logic rst,
+    input logic         clk,
     logic [WIDTH-2-1:0] bus_address,
-    logic        write_enable,
-    input        MemoryBus::Cmd membuscmd,
-    output       MemoryBus::Result membusres
+    logic               write_enable,
+    input               MemoryBus::Cmd membuscmd,
+    output              MemoryBus::Result membusres
     );
 
-/*-----Dudas-----
+   logic [7:0]          mem0 [2**(WIDTH-2)];
+   logic [7:0]          mem1 [2**(WIDTH-2)];
+   logic [7:0]          mem2 [2**(WIDTH-2)];
+   logic [7:0]          mem3 [2**(WIDTH-2)];
 
-	1)Si se pide la direccion cero que deberia devolver??
-	2)Si hay un reset no puedo poner toda la memoria en cero porque tengo las intruciones, solo deberia borrar
-	  la seccion de datos, queda para despues ver eso.
-	3)Los SB, el dato que ingresa a la memoria trae el byte a escribir en el menos significativo??
-	  Que sucede con los SH, tambien vienen en los bytes menos significativos???
-*/
-   logic [3:0] [7:0] mem [2**(WIDTH-2)];
+   //Variables
+   uint32 writeValue;
 
-//Variables
-uint32 writeValue;
+   assign writeValue = membuscmd.write_data;
 
-assign writeValue = membuscmd.write_data;
+   logic [WIDTH-2-1:0]  bus_address_reg;
 
-//Read Data
+   assign membusres[7:0] = mem0[bus_address_reg]; //4 byte copy
+   assign membusres[15:8] = mem1[bus_address_reg]; //4 byte copy
+   assign membusres[23:16] = mem2[bus_address_reg]; //4 byte copy
+   assign membusres[31:24] = mem3[bus_address_reg]; //4 byte copy
+
+   //Write Data
    always_ff @(posedge clk) begin
-      if (membuscmd.mem_read) begin
-         membusres <= mem[bus_address]; //4 byte copy
-      end else begin
-         membusres <=  32'bx ; //4 byte copy
+      bus_address_reg <= bus_address;
+      if (write_enable) begin
+			   if (membuscmd.mask_byte[0])begin
+            mem0[bus_address] <= writeValue[7:0];
+			   end
+         if (membuscmd.mask_byte[1])begin
+            mem1[bus_address] <= writeValue[15:8];
+         end
+         if (membuscmd.mask_byte[2])begin
+            mem2[bus_address] <= writeValue[23:16];
+         end
+         if (membuscmd.mask_byte[3])begin
+            mem3[bus_address] <= writeValue[31:24];
+         end
       end
    end
-
-//Write Data
-always_ff @(posedge clk /*, posedge rst*/) begin
-    // if (rst) mem <= '{default:0};
-    // else
-    if (write_enable) begin
-			case(membuscmd.mask_byte)
-  			1:   mem[bus_address][0] <= writeValue[7:0];//1 byte copy
-  			2:   mem[bus_address][1] <= writeValue[7:0];//1 byte copy
-  			3:   mem[bus_address][1:0] <= writeValue[15:0]; //2 byte copy / debe ser little-endian
-  			4:   mem[bus_address][2] <= writeValue[7:0];//1 byte copy
-  			6:   mem[bus_address][2:1] <= writeValue[15:0]; //2 byte copy / debe ser little-endian
-  			8:   mem[bus_address][3] <= writeValue[7:0];//1 byte copy
-  			12:  mem[bus_address][3:2] <= writeValue[15:0]; //2 byte copy / debe ser little-endian
-  			15:  mem[bus_address] <= writeValue[31:0]; //4 byte copy / debe ser little-endian
-			endcase
-		end
-end
 
 endmodule

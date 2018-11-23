@@ -1,14 +1,16 @@
 import Common::*;
 import MemoryBus::*;
 
-module TOP_verilator(input logic         CLK_50M,
-                     input logic         USER_BUTTON1,
+module TOP_microsemi(input logic         USER_BUTTON1,
                      output logic        FTDI_UART0_TXD
                      );
    logic clk;
-   assign clk = CLK_50M;
    logic rst_cpu;
    assign rst_cpu = USER_BUTTON1;
+module clock_generator(
+    // Outputs
+    .RCOSC_25_50MHZ_O2F(clk)
+);
 
    logic uart_tx_o;
 
@@ -116,4 +118,4 @@ module TOP_verilator(input logic         CLK_50M,
                      .mtime_debug_o(mtime_o)
                      );
 
-endmodule; // TOP_verilator
+endmodule; // TOP_microsemi
