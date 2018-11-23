@@ -24,9 +24,30 @@ module csrUnit
   input logic [31:0]      mtimeData_i,
   input logic             mtimeWe_i,
   input logic [31:0]      mtimeAddress_i,
-  output logic [31:0]     mtimeData_o,
-  output logic [31:0]     mtime_debug_o
+  output logic [31:0]     mtimeData_o//,
+  //output logic [31:0]     mtime_debug_o
+
   );
+
+  //////////////////////////
+  // Implemented Registers
+  //////////////////////////
+
+  //TODO: Verify stripping unused bits, actually all registers are 32 bits
+  mstatus_csr_t mstatus_reg, mstatus_next;
+  csr_raw_t     mtvec_reg;//, mtvec_next;
+  mip_csr_t     mip_reg, mip_next;
+  mie_csr_t     mie_reg;//, mie_next;
+  csr_raw_t     mscratch_reg;//, mscratch_next;
+  csr_raw_t     mepc_reg, mepc_next;
+  csr_raw_t     mcause_reg, mcause_next;
+  csr_raw_t     mtval_reg, mtval_next;
+  csr_raw_t     next_state;
+
+  csr_raw64_t   mtime_reg, mtime_next;
+  csr_raw64_t   mtimecmp_reg, mtimecmp_next;
+
+
 
   //////////////////////////
   // Internal Signals
@@ -53,28 +74,12 @@ module csrUnit
   assign data_o = csrRead;
   assign mtvec_o = mtvec_reg;
   assign mepc_o = mepc_reg;
+  //assign mtime_debug_o = mtime_reg[31:0];
 
   // Check if enabled and pending interrupt match, for mtime interrupt
   assign mtime_exc_o = (mstatus_reg.mie) ? (mie_reg.mtie && mip_reg.mtip): 1'b0;
 
-  //////////////////////////
-  // Implemented Registers
-  //////////////////////////
 
-  //TODO: Verify stripping unused bits, actually all registers are 32 bits
-  mstatus_csr_t mstatus_reg, mstatus_next;
-  csr_raw_t     mtvec_reg, mtvec_next;
-  mip_csr_t     mip_reg, mip_next;
-  mie_csr_t     mie_reg, mie_next;
-  csr_raw_t     mscratch_reg, mscratch_next;
-  csr_raw_t     mepc_reg, mepc_next;
-  csr_raw_t     mcause_reg, mcause_next;
-  csr_raw_t     mtval_reg, mtval_next;
-
-  csr_raw64_t   mtime_reg, mtime_next;
-  csr_raw64_t   mtimecmp_reg, mtimecmp_next;
-
-   assign mtime_debug_o = mtime_reg[31:0];
 
   ////////////////////
   // Actual Registers
@@ -116,15 +121,16 @@ module csrUnit
   always_comb begin : write_logic
 
     mstatus_next   = mstatus_reg;
-    mtvec_next     = mtvec_reg;
     mip_next       = mip_reg;
-    mie_next       = mie_reg;
-    mscratch_next  = mscratch_reg;
-    mepc_next      = mepc_reg;
+	mepc_next      = mepc_reg;
     mcause_next    = mcause_reg;
     mtval_next     = mtval_reg;
+	next_state	   = 0;
+    /*mtvec_next     = mtvec_reg;
+    mie_next       = mie_reg;
+    mscratch_next  = mscratch_reg;
+    */
 
-    if (we) begin
       unique case (address_i)
         CSR_MSTATUS: begin
                         mstatus_next = csrWrite;
@@ -151,34 +157,33 @@ module csrUnit
 
         CSR_MTVEC:    begin
                         //Use only one of this lines: Hardcoded value vs. write data from datapath
-                        mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
+                        next_state = {csrWrite[31:2],2'b0}; //mtvec_next = {csrWrite[31:2],2'b0}; // Two LSBs hardwired to zero
                         // mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
                       end
         CSR_MIP:      begin
                         // mip_next = csrWrite & 32'h000;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts end
         end
         CSR_MIE:      begin
-                        mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
+                        next_state = csrWrite & SUPPORTED_INTERRUPTS_MASK;//mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
                       end
         CSR_MSCRATCH: begin
-                        mscratch_next = csrWrite;
+                         next_state = csrWrite;//mscratch_next = csrWrite;
                       end
         CSR_MEPC:     begin
-                        mepc_next = {csrWrite[31:2],2'b0};
+                        next_state = {csrWrite[31:2],2'b0};//mepc_next = {csrWrite[31:2],2'b0};
                       end
         CSR_MCAUSE:   begin
-                        mcause_next = csrWrite; // TODO: Verify if we protect form writing illegal exception values
+                        next_state = csrWrite;//mcause_next = csrWrite; // TODO: Verify if we protect form writing illegal exception values
                       end
         CSR_MTVAL:    begin
-                        mtval_next = csrWrite;
+                        next_state = csrWrite;//mtval_next = csrWrite;
                       end
         default: begin
-           $display("unknown CSR: %p", address_i);
-           $stop();
+           //$display("unknown CSR: %p", address_i);
+           //$stop();
         end
       endcase
 
-    end
 
     ///////////////////////////
     //  Timer registers write
@@ -219,7 +224,7 @@ module csrUnit
       mepc_next = pc_i;                                            // Save actual pc
       mcause_next = excCause_i;      // Register exception cause.
       mtval_next = trapInfo_i;  // TODO: Verify if specific values should be written within this block
-       mstatus_next.mie = 0;
+      mstatus_next.mie = 0;
 
     end
   end : write_logic
@@ -228,7 +233,7 @@ module csrUnit
   always_ff @ (posedge clk) begin
       if(rst) begin
         mstatus_reg   <= '0;
-        mtvec_reg     <= '0; // Two LSBs hardwired to zero
+        mtvec_reg <= '0; // Two LSBs hardwired to zero
         mip_reg       <= '0;
         mie_reg       <= '0;
         mscratch_reg  <= '0;
@@ -240,15 +245,47 @@ module csrUnit
       end
       else  begin
         mstatus_reg   <= mstatus_next;
-        mtvec_reg     <= mtvec_next;
         mip_reg       <= mip_next;
-        mie_reg       <= mie_next;
+        /*mtvec_reg     <= mtvec_next;
         mscratch_reg  <= mscratch_next;
         mepc_reg      <= mepc_next;
         mcause_reg    <= mcause_next;
         mtval_reg     <= mtval_next;
         mtime_reg     <= mtime_next;
-        mtimecmp_reg  <= mtimecmp_next;
+        mtimecmp_reg  <= mtimecmp_next;*/
+		if(we) begin
+		unique case (address_i)
+            CSR_MTVEC:    begin
+                            //Use only one of this lines: Hardcoded value vs. write data from datapath
+                          mtvec_reg <=  next_state ;
+                            // mtvec_next = HARDCODED_MTVEC; // Two LSBs hardwired to zero
+                          end
+            CSR_MIP:      begin
+                            // mip_next = csrWrite & 32'h000;    // TODO: Verify this mask! Only accesible bit is MTIP for clearing Timer interrupts end
+            end
+            CSR_MIE:      begin
+                            mie_reg <=  next_state ;//mie_next = csrWrite & SUPPORTED_INTERRUPTS_MASK;
+                          end
+            CSR_MSCRATCH: begin
+                             mscratch_reg <=  next_state ;
+                          end
+            CSR_MEPC:     begin
+                            mtvec_reg <=  next_state ;
+                          end
+            CSR_MCAUSE:   begin
+                            mcause_reg <=  next_state ;
+                          end
+            CSR_MTVAL:    begin
+                            mtval_reg <=  next_state ;
+                          end
+			default:begin
+					mepc_reg      <= mepc_next;
+					mcause_reg    <= mcause_next;
+					mtval_reg     <= mtval_next;
+				end
+          endcase
+		end
       end
-  end
+	end
+	
 endmodule
