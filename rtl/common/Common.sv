@@ -1,26 +1,25 @@
-//Falta agregar instrucciones fence y priviliged a la funcion getName, y ver donde mas agregar cosas
 import riscV_unrn_pkg::*;
 
 package Common;
 
 /*----------VARIABLES----------*/
 
-   typedef logic[4:0] regId_t;
-   typedef logic [31:0] uint32;
-   typedef logic [7:0] uint8;
-   typedef logic signed [31:0] int32_t;
-   typedef logic [4:0]  opcode_t;
-   typedef logic [31:0] raw_instr_t;
+typedef logic[4:0] regId_t;
+typedef logic [31:0] uint32;
+typedef logic [7:0] uint8;
+typedef logic signed [31:0] int32_t;
+typedef logic [4:0]  opcode_t;
+typedef logic [31:0] raw_instr_t;
 
 /*-----------TYPEDEF ENUM----------*/
 
    typedef enum logic [5:0] {
-                             instr_type_R = 'b1,
-                             instr_type_I = 'b10,
-                             instr_type_S =  'b100,
-                             instr_type_SB ='b1000,
-                             instr_type_U =  'b10000,
-                             instr_type_UJ = 'b100000
+                             instr_type_R = 1,
+                             instr_type_I = 2,
+                             instr_type_S =  3,
+                             instr_type_SB = 4,
+                             instr_type_U =  5,
+                             instr_type_UJ = 6
                        } instr_type_t;
 
    typedef enum	logic [3:0] {
@@ -91,106 +90,32 @@ package Common;
       logic             excRequest;
       logic             excRet;
       uint32            excCause;
+			regId_t rs1;
+			regId_t rs2;
+			regId_t rd;
 	  } control_out_t;
 
+   typedef enum {
+                 // PC_FETCH = 1 << 0,
+                 // INST_DEC = 1 << 1,
+                 // READ_REGS = 1 << 2,
+                 // ALU  = 1 << 3,
+                 // WAIT_ALU  = 1 << 4,
+                 // MEM_OP  = 1 << 5,
+                 // WRITEBACK  = 1 << 6,
+                 // CALC_NEXT_PC  = 1 <<7,
+                 // WAIT_ALU_PC  = 1 << 8,
+                 // STORE_ALU_PC  = 1 << 9
+                 PC_FETCH       = 1,
+                 INST_DEC = 2,
+                 READ_REGS = 3,
+                 ALU = 4,
+                 WAIT_ALU = 5,
+                 MEM_OP = 6,
+                 WRITEBACK = 7,
+                 CALC_NEXT_PC = 8,
+                 WAIT_ALU_PC = 9,
+                 STORE_ALU_PC = 10
+        } stage_t;
 
-   /*---------FUNCIONES----------*/
-
-   // function opcode_t get_opcode(raw_instr_t instr);
-   //    return instr[6:0];
-   // endfunction
-   //
-   // function instr_type_t get_instr_type(opcode_t opcode);
-   //    casez (opcode)
-   //      7'b0000011: return instr_type_I;//RiscV32I
-   //      7'b0001111: return instr_type_I;//RiscV32I
-   //      7'b0010011: return instr_type_I;//RiscV32I
-   //      7'b0010111: return instr_type_U;//RiscV32I
-   //      7'b0100011: return instr_type_S;//RiscV32I
-   //      7'b0110011: return instr_type_R;//RiscV32I-RiscV32M    ----------------------------------------------------?????
-   //      7'b0110111: return instr_type_U;//RiscV32I
-   //      7'b1100011: return instr_type_SB;//RiscV32I
-   //      7'b1000111: return instr_type_I;//RiscV32D	---------------------------------------------------------------?????
-   //      7'b1101111: return instr_type_UJ;//RiscV32I
-	// 	    7'b1100111: return instr_type_I;//RiscV32I
-   //      7'b1110011: return instr_type_I;//RiscV32I_privileged
-   //      default: begin
-   //         // assert(0) else $error("could not classify opcode %b into instr type",
-   //                               // opcode);
-   //      end
-   //    endcase
-   // endfunction
-   //
-   // function int32_t sign_extend_imm(decoded_instr_t instr);
-   //    automatic opcode_t opcode = instr.opcode;
-   //    automatic instr_type_t instr_type = get_instr_type(opcode);
-   //    automatic int32_t result = 'x;
-   //    unique case (instr_type)
-   //      instr_type_I:  result =  32'(signed'(instr.imm[11:0]));
-   //      instr_type_S:  result =  32'(signed'(instr.imm[11:0]));
-   //      instr_type_SB: result =  32'(signed'(instr.imm[12:0]));
-   //      instr_type_U:  result =  32'(signed'(instr.imm[31:0]));
-   //      instr_type_UJ: result =  32'(signed'(instr.imm[20:0]));
-   //      // instr_type_R:  resultassert(0) else $error("R-type instructions do not have imms");
-   //    endcase
-   //    return result;
-   // endfunction
-   //
-   // function decoded_instr_t decode_instruction(raw_instr_t instr);
-   //    decoded_instr_t result = '{default: 0};
-   //    instr_type_t instr_type = '{default: 0};
-   //
-   //    result.opcode = get_opcode(instr);
-   //    instr_type = get_instr_type(result.opcode);
-   //    case (instr_type)
-   //      default: begin
-   //          result = 0;
-   //      end
-   //      instr_type_I: begin
-   //         result.imm[11:0] = instr[31:20];
-   //         result.rs1 = instr[19:15];
-   //         result.funct3 = instr[14:12];
-   //         result.rd = instr[11:7];
-   //      end
-   //      instr_type_U: begin
-   //         result.imm[31:12] = instr[31:12];
-   //         result.rd = instr[11:7];
-   //      end
-   //      instr_type_R: begin
-   //         result.funct7 = instr[31:25];
-   //         result.rs2 = instr[24:20];
-   //         result.rs1 = instr[19:15];
-   //         result.funct3 = instr[14:12];
-   //         result.rd = instr[11:7];
-   //      end
-   //      instr_type_S: begin
-   //         result.imm[11:5] = instr[31:25];
-   //         result.rs2 = instr[24:20];
-   //         result.rs1 = instr[19:15];
-   //         result.funct3 = instr[14:12];
-   //         result.imm[4:0] = instr[11:7];
-   //      end
-   //      instr_type_SB: begin
-   //         result.imm[12]= instr[31];
-   //         result.imm[10:5] = instr[30:25];
-   //         result.rs2 = instr[24:20];
-   //         result.rs1 = instr[19:15];
-   //         result.funct3 = instr[14:12];
-   //         result.imm[4:1] = instr[11:8];
-   //         result.imm[11]= instr[7];
-   //         result.imm[0] = 0;
-   //      end
-   //      instr_type_UJ: begin
-   //         result.imm[20]= instr[31];
-   //         result.imm[10:1] = instr[30:21];
-   //         result.imm[11]= instr[20];
-   //         result.imm[19:12] = instr[19:12];
-   //         result.imm[0] = 0;
-   //         result.rd = instr[11:7];
-   //      end
-   //    endcase
-   //    return result;
-   // endfunction
-
-
-endpackage
+endpackage; // Common

@@ -1,29 +1,28 @@
 import Common::*;
 import MemoryBus::*;
 
-module TOP_verilator(input logic         clk,
-                     input logic         rst_cpu,
-                     input logic         probe_mem,
-
-                     input logic [29:0]  probe_address,
-                     input logic         probe_mem_read, probe_mem_write,
-                     input logic [3:0]   probe_mask_byte,
-                     input               uint32 probe_write_data,
-                     output              uint32 probe_read_data,
-                     output logic [7:0]  uart_data,
-                     output logic        uart_write,
-                     output logic [31:0] pc_o,
-                     output logic [31:0] mtime_o
+module TOP_verilator(input logic         CLK_50M,
+                     input logic         USER_BUTTON1,
+                     output logic        FTDI_UART0_TXD
                      );
+   logic clk;
+   assign clk = CLK_50M;
+   logic rst_cpu;
+   assign rst_cpu = USER_BUTTON1;
 
    logic [29:0]                          cpu_bus_address;
    logic                                 cpu_mem_write;
    logic                                 data_bus_write_enable;
+   logic                                 memory_write_enable;
+   logic                                 exception;
+   uint32 pc;
+   mem_inst_type_t instType_cpu;
+   uint32 addressCpu_o;
+   uint32 cpu_data_result;
+
 
    MemoryBus::Cmd cpu_bus_cmd;
    MemoryBus::Result cpu_bus_result;
-   MemoryBus::Cmd probe_bus_cmd;
-   MemoryBus::Result probe_bus_result;
    logic [29:0]                          memory_bus_address;
    MemoryBus::Cmd memory_bus_cmd;
    MemoryBus::Result memory_bus_result;
@@ -36,35 +35,15 @@ module TOP_verilator(input logic         clk,
    MemoryBus::Cmd uart_bus_cmd;
    MemoryBus::Result uart_bus_result;
 
-   assign uart_data = uart_bus_cmd.write_data[7:0];
+   assign FTDI_UART0_TXD = uart_bus_cmd.write_data[0];
    assign uart_bus_result = '{default: 0};
 
-   uint32 cpu_data_result;
 
-   assign probe_bus_cmd.mem_read = probe_mem_read;
-   assign probe_bus_cmd.mask_byte = probe_mask_byte;
-   assign probe_bus_cmd.write_data = probe_write_data;
-   assign probe_read_data = probe_bus_result;
-
-   logic                                 memory_write_enable;
-
-   //Bus
-   MasterBusMux #(.TCmd(MemoryBus::Cmd),
-                  .TResult(MemoryBus::Result))
-   master_bus(.useA(probe_mem),
-              .addressA(probe_address),
-              .writeEnableA(probe_mem_write),
-              .busACmd(probe_bus_cmd),
-              .busAResult(probe_bus_result),
-              .addressB(cpu_bus_address),
-              .writeEnableB(cpu_mem_write),
-              .busBCmd(cpu_bus_cmd),
-              .busBResult(cpu_bus_result),
-              .addressCommon(memory_bus_address),
-              .writeEnableCommon(memory_write_enable),
-              .busCommonCmd(memory_bus_cmd),
-              .busCommonResult(memory_bus_result)
-              );
+   assign memory_bus_address = cpu_bus_address;
+   assign memory_write_enable = cpu_mem_write;
+   assign memory_bus_cmd = cpu_bus_cmd;
+   assign cpu_bus_result = memory_bus_result;
+   assign pc_o = pc;
 
    SlaveBusMux #(.TCmd(MemoryBus::Cmd),
                  .TResult(MemoryBus::Result),
@@ -87,7 +66,6 @@ module TOP_verilator(input logic         clk,
              .result_2(uart_bus_result));
 
    //Memory Interface
-   logic                                 exception;
 
    ControllerMem controllerMem(.address(addressCpu_o[1:0]),
                                .dataMemOut(cpu_bus_result),
@@ -102,21 +80,17 @@ module TOP_verilator(input logic         clk,
 
    //Memory
 
-   uint32 pc;
-
    DataMem #(.WIDTH(riscV_unrn_pkg::RAM_WIDTH))
    data_mem(.clk,
             .write_enable(data_bus_write_enable),
-            .bus_address(data_bus_address[riscV_unrn_pkg::RAM_WIDTH-2-1:0]),
+            .bus_address(data_bus_address[1:0]),
             .membuscmd(data_bus_cmd),
             .membusres(data_bus_result)
             );
+
    //Core
 
    assign cpu_bus_address = addressCpu_o[31:2];
-
-   mem_inst_type_t instType_cpu;
-   uint32 addressCpu_o;
 
    unicycle unicycle(
                      //INPUTS
@@ -131,7 +105,5 @@ module TOP_verilator(input logic         clk,
                      .pc_o(pc),
                      .mtime_debug_o(mtime_o)
                      );
-   assign pc_o = pc;
-
 
 endmodule; // TOP_verilator

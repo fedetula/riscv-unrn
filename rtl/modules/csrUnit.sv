@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 import riscV_unrn_pkg::*;
 
 module csrUnit
@@ -172,9 +170,10 @@ module csrUnit
         CSR_MTVAL:    begin
                         mtval_next = csrWrite;
                       end
+        CSR_MHARTID: begin
+                     end
         default: begin
            $display("unknown CSR: %p", address_i);
-           $stop();
         end
       endcase
 
