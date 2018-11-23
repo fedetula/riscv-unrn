@@ -20,12 +20,12 @@ module DataMem
    uint32 writeValue;
 
    assign writeValue = membuscmd.write_data;
-/*
-   initial $readmemh("/home/nicolas/Code/unrn-riscv/unrn-riscv-softcpu/hw/program0.mem", mem0);
-   initial $readmemh("/home/nicolas/Code/unrn-riscv/unrn-riscv-softcpu/hw/program1.mem", mem1);
-   initial $readmemh("/home/nicolas/Code/unrn-riscv/unrn-riscv-softcpu/hw/program2.mem", mem2);
-   initial $readmemh("/home/nicolas/Code/unrn-riscv/unrn-riscv-softcpu/hw/program3.mem", mem3);
-*/
+
+   initial $readmemh("/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/program0.mem", mem0);
+   initial $readmemh("/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/program1.mem", mem1);
+   initial $readmemh("/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/program2.mem", mem2);
+   initial $readmemh("/home/unrn/unrn-riscv/unrn-riscv-softcpu/hw/program3.mem", mem3);
+
    //Write Data
    always_ff @(posedge clk) begin
 			   if (write_enable && membuscmd.mask_byte[0])begin
