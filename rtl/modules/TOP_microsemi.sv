@@ -11,7 +11,7 @@ module TOP_microsemi(input logic         USER_BUTTON1,
    logic uart_tx_o;
 
    // clock_gen
-   clock_gen(
+   clock_gen ccc(
     // Outputs
       .GL0(uart_clk),
       .RCOSC_25_50MHZ_O2F(clk)
@@ -49,7 +49,6 @@ module TOP_microsemi(input logic         USER_BUTTON1,
    assign memory_write_enable = cpu_mem_write;
    assign memory_bus_cmd = cpu_bus_cmd;
    assign cpu_bus_result = memory_bus_result;
-   assign pc_o = pc;
 
    SlaveBusMux #(.TCmd(MemoryBus::Cmd),
                  .TResult(MemoryBus::Result),
@@ -99,7 +98,7 @@ module TOP_microsemi(input logic         USER_BUTTON1,
    DataMem #(.WIDTH(riscV_unrn_pkg::RAM_WIDTH))
    data_mem(.clk,
             .write_enable(data_bus_write_enable),
-            .bus_address(data_bus_address[1:0]),
+            .bus_address(data_bus_address),
             .membuscmd(data_bus_cmd),
             .membusres(data_bus_result)
             );
@@ -118,7 +117,6 @@ module TOP_microsemi(input logic         USER_BUTTON1,
                      .writeData_o(cpu_bus_cmd.write_data),
                      .dataAddress_o(addressCpu_o),
                      .exception_o(exception),
-                     .pc_o(pc),
-                     .mtime_debug_o(mtime_o)
+                     .pc_o(pc)
                      );
 endmodule; // TOP_microsemi

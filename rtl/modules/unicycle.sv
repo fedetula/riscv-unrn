@@ -10,8 +10,7 @@ module unicycle(
                 output       uint32 dataAddress_o,
                 input        uint32 readData_i,
                 output       uint32 pc_o,
-                output logic exception_o,
-                output       uint32 mtime_debug_o
+                output logic exception_o
                 );
    /////////////////////
   // Internal signals
@@ -139,8 +138,7 @@ module unicycle(
                 .mtimeData_i   (reg_file_read_data2),
                 .mtimeWe_i     (mtimeWe),
                 .mtimeAddress_i(alu_result),
-                .mtimeData_o   (mtimeData),
-                .mtime_debug_o
+                .mtimeData_o   (mtimeData)
                 );
 
    excDetect excDetect(
