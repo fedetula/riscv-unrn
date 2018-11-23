@@ -10,6 +10,8 @@ module TOP_verilator(input logic         CLK_50M,
    logic rst_cpu;
    assign rst_cpu = USER_BUTTON1;
 
+   logic uart_tx_o;
+
    logic [29:0]                          cpu_bus_address;
    logic                                 cpu_mem_write;
    logic                                 data_bus_write_enable;
@@ -35,9 +37,7 @@ module TOP_verilator(input logic         CLK_50M,
    MemoryBus::Cmd uart_bus_cmd;
    MemoryBus::Result uart_bus_result;
 
-   assign FTDI_UART0_TXD = uart_bus_cmd.write_data[0];
-   assign uart_bus_result = '{default: 0};
-
+   assign FTDI_UART0_TXD = uart_tx_o;
 
    assign memory_bus_address = cpu_bus_address;
    assign memory_write_enable = cpu_mem_write;
@@ -64,6 +64,16 @@ module TOP_verilator(input logic         CLK_50M,
              .we_2(uart_write),
              .cmd_2(uart_bus_cmd),
              .result_2(uart_bus_result));
+
+    //UART Instance
+    uart #(.BAUDRATE(115200), .F_CLK(576000)) uart0(
+        .sys_clk_i      (clk),
+        .sys_rst_i      (rst_cpu),
+        .uart_data_o    (uart_bus_result),
+        .uart_tx_o      (uart_tx_o),
+        .uart_wr_i      (uart_write),
+        .uart_dat_i     (uart_bus_cmd.write_data[7:0])
+        );
 
    //Memory Interface
 
