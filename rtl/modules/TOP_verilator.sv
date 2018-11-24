@@ -12,8 +12,7 @@ module TOP_verilator(input logic         clk,
                      output              uint32 probe_read_data,
                      output logic [7:0]  uart_data,
                      output logic        uart_write,
-                     output logic [31:0] pc_o,
-                     output logic [31:0] mtime_o
+                     output logic [31:0] pc_o
                      );
 
    logic [29:0]                          cpu_bus_address;
@@ -128,8 +127,7 @@ module TOP_verilator(input logic         clk,
                      .writeData_o(cpu_bus_cmd.write_data),
                      .dataAddress_o(addressCpu_o),
                      .exception_o(exception),
-                     .pc_o(pc),
-                     .mtime_debug_o(mtime_o)
+                     .pc_o(pc)
                      );
    assign pc_o = pc;
 
