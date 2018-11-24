@@ -100,14 +100,6 @@ module unicycle(
                     .read_data1   (reg_file_read_data1),
                     .read_data2   (reg_file_read_data2));
 
-   always_comb begin
-      unique case (control_out.regData)
-        2'b00: reg_file_write_data = memToReg;
-        2'b01: reg_file_write_data = PC_reg + 4;
-        2'b10: reg_file_write_data = csrReadData;
-        2'b11: reg_file_write_data = immediate_val;
-      endcase
-   end
 
    /////////////
      // ALU
