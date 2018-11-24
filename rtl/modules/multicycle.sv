@@ -311,6 +311,7 @@ module multicycle(
            PC_next = alu_result;
            if (shouldTakeJump_reg) begin
               excDetect_shouldJump = 1;
+              PC_JumpDst = alu_result;
               if (exceptionPresent) begin
                  jumpToMtvec = 1;
                  PC_next = mtvec;
