@@ -206,6 +206,7 @@ module multicycle(
            stage_next = WAIT_ALU;
         end
         WAIT_ALU: begin
+           alu_control = control_out.alu_op;
            stage_next = alu_will_be_done ? MEM_OP : WAIT_ALU;
         end
         MEM_OP: begin
@@ -302,6 +303,7 @@ module multicycle(
            end
         end
         WAIT_ALU_PC: begin
+           alu_control = ALU_add;
            shouldTakeJump_next = shouldTakeJump_reg;
            stage_next = alu_will_be_done ? STORE_ALU_PC : WAIT_ALU_PC;
         end
