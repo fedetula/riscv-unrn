@@ -23,21 +23,21 @@ typedef logic [31:0] raw_instr_t;
                        } instr_type_t;
 
    typedef enum	logic [3:0] {
-                         ALU_and = 'b0000,
-                         ALU_or  = 'b0001,
-                         ALU_add = 'b0010,
-						 ALU_cne = 'b0011,
-						 ALU_sll = 'b0100,
-						 ALU_sub = 'b0110,
-						 ALU_srl = 'b0111,
-						 ALU_sra = 'b0111,
-						 ALU_slt = 'b1000,
-						 ALU_sltu = 'b1001,
-						 ALU_xor = 'b1010,
-						 ALU_cge = 'b1011,
-						 ALU_cgeu = 'b1100,
-						 ALU_ce = 'b1101
-                         } ALU_control_t;
+                             ALU_and  =  0,
+                             ALU_or   =  1,
+                             ALU_add  =  2,
+                             ALU_cne  =  3,
+                             ALU_sll  =  4,
+                             ALU_sub  =  5,
+                             ALU_srl  =  6,
+                             ALU_sra  =  7,
+                             ALU_slt  =  8,
+                             ALU_sltu =  9,
+                             ALU_xor  = 10,
+                             ALU_cge  = 11,
+                             ALU_cgeu = 12,
+                             ALU_ce   = 13
+                             } ALU_control_t;
 
     typedef enum	logic [2:0] {
                       PC_PLUS_4 = 'b000,
