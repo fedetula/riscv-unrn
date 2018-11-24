@@ -174,10 +174,10 @@ module csrUnit
                         mtval_next = csrWrite;
                       end
         CSR_MCYCLE:   begin
-                        mcycle_next[31:0] = csrWrite;
+                        mcycle_next = {mcycle_reg[63:32],csrWrite};
                       end
         CSR_MCYCLEH:  begin
-                        mcycle_next[63:32] = csrWrite;
+                        mcycle_next = {csrWrite,mcycle_reg[31:0]};
                       end
         default: begin
            // $display("unknown CSR: %p", address_i);
