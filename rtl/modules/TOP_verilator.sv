@@ -118,7 +118,7 @@ module TOP_verilator(input logic         clk,
    mem_inst_type_t instType_cpu;
    uint32 addressCpu_o;
 
-   unicycle unicycle(
+   multicycle multicycle(
                      //INPUTS
                      .clk,
                      .rst(rst_cpu),

@@ -1,7 +1,7 @@
 import Common::*;
 import riscV_unrn_pkg::*;
 
-module unicycle(
+module multicycle(
                 input logic  clk,
                 input logic  rst,
                 //Memory Interface
@@ -116,10 +116,10 @@ module unicycle(
 
    ALU alu(.clk,
            .start(alu_start),
+           .operation   (alu_control),
+           .dataA     (alu_data1),
+           .dataB     (alu_data2),
            .will_be_done(alu_will_be_done),
-           .control   (alu_control),
-           .data1     (alu_data1),
-           .data2     (alu_data2),
            .result    (alu_result));
 
    csrUnit csrs(

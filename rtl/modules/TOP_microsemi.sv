@@ -102,7 +102,7 @@ module TOP_verilator(input logic         CLK_50M,
 
    assign cpu_bus_address = addressCpu_o[31:2];
 
-   unicycle unicycle(
+   multicycle multicycle(
                      //INPUTS
                      .clk,
                      .rst(rst_cpu),
