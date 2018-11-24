@@ -70,6 +70,7 @@ module csrUnit
 
   csr_raw64_t   mtime_reg, mtime_next;
   csr_raw64_t   mtimecmp_reg, mtimecmp_next;
+  csr_raw64_t   mcycle_reg, mcycle_next; 
 
    //assign mtime_debug_o = mtime_reg[31:0];
 
@@ -92,6 +93,8 @@ module csrUnit
       CSR_MEPC:     csrRead = mepc_reg;
       CSR_MCAUSE:   csrRead = mcause_reg;
       CSR_MTVAL:    csrRead = mtval_reg;
+      CSR_MCYCLE:   csrRead = mcycle_reg[31:0];
+      CSR_MCYCLEH:  csrRead = mcycle_reg[63:32];
       default:      csrRead = 32'b0;
     endcase
 
@@ -120,6 +123,7 @@ module csrUnit
     mepc_next      = mepc_reg;
     mcause_next    = mcause_reg;
     mtval_next     = mtval_reg;
+    mcycle_next    = mcycle_reg + 1;
 
     if (we) begin
       unique case (address_i)
@@ -168,6 +172,12 @@ module csrUnit
                       end
         CSR_MTVAL:    begin
                         mtval_next = csrWrite;
+                      end
+        CSR_MCYCLE:   begin
+                        mcycle_next[31:0] = csrWrite;
+                      end
+        CSR_MCYCLEH:  begin
+                        mcycle_next[63:32] = csrWrite;
                       end
         default: begin
            // $display("unknown CSR: %p", address_i);
@@ -234,6 +244,7 @@ module csrUnit
         mtval_reg     <= '0;
         mtime_reg     <= '0;
         mtimecmp_reg  <= '0;
+        mcycle_reg    <= '0;
       end
       else  begin
         mstatus_reg   <= mstatus_next;
@@ -246,6 +257,7 @@ module csrUnit
         mtval_reg     <= mtval_next;
         mtime_reg     <= mtime_next;
         mtimecmp_reg  <= mtimecmp_next;
+        mcycle_reg    <= mcycle_next;
       end
   end
 endmodule
