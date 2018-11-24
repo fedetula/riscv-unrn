@@ -107,7 +107,7 @@ module TOP_microsemi(input logic         USER_BUTTON1,
 
    assign cpu_bus_address = addressCpu_o[31:2];
 
-   unicycle unicycle(
+   multicycle multicycle(
                      //INPUTS
                      .clk,
                      .rst(rst_cpu),

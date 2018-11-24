@@ -28,15 +28,15 @@ typedef logic [31:0] raw_instr_t;
                          ALU_add = 'b0010,
 						 ALU_cne = 'b0011,
 						 ALU_sll = 'b0100,
-             ALU_sub = 'b0110,
+						 ALU_sub = 'b0110,
 						 ALU_srl = 'b0111,
-						 ALU_sra = 'b1000,
-						 ALU_slt = 'b1001,
-						 ALU_sltu = 'b1011,
+						 ALU_sra = 'b0111,
+						 ALU_slt = 'b1000,
+						 ALU_sltu = 'b1001,
 						 ALU_xor = 'b1010,
-						 ALU_cge = 'b1100,
-						 ALU_cgeu = 'b1101,
-						 ALU_ce = 'b1110
+						 ALU_cge = 'b1011,
+						 ALU_cgeu = 'b1100,
+						 ALU_ce = 'b1101
                          } ALU_control_t;
 
     typedef enum	logic [2:0] {
