@@ -1,6 +1,5 @@
 import Common::*;
 import riscV_unrn_pkg::*;
-import MemoryBus::*;
 
 module multicycle(
                 input logic  clk,
@@ -9,7 +8,7 @@ module multicycle(
                 output       mem_inst_type_t instType_o,
                 output       uint32 writeData_o,
                 output       uint32 dataAddress_o,
-                input        MemoryBus::Result readData_i,
+                input        uint32 readData_i,
                 output       uint32 pc_o,
                 output logic exception_o
                 );
@@ -77,7 +76,7 @@ module multicycle(
    end
 
    instr_decoder deco(.clk,
-                      .raw_instr_i (readData_i.data),
+                      .raw_instr_i (readData_i),
                       .store_imm(instr_decode),
                       .instr_o     (dec_instr),
                       .imm_o       (immediate_val)
@@ -253,7 +252,7 @@ module multicycle(
            instType_o = control_out.instType;
            csr_op = control_out.csr_op;
            reg_file_we = control_out.reg_write & ~exceptionPresent;
-           data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i.data;
+           data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i;
            memToReg = control_out.mem_to_reg ? data_mem_out : alu_result;
            dataToCsr = (control_out.csr_source) ? reg_file_read_data1 : 32'(control_out.rs1);
 
