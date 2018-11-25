@@ -5,6 +5,7 @@ module DataMem
   #(parameter WIDTH=15)
    (
     input logic         clk,
+    input logic         rst,
     logic [WIDTH-2-1:0] bus_address,
     logic               write_enable,
     input               MemoryBus::Cmd membuscmd,
@@ -67,29 +68,57 @@ module DataMem
            writeValMem2 = writeValue[23:16];
            writeValMem3 = writeValue[31:24];
         end
+        default: begin
+        end
       endcase
    end
 
+   typedef enum {
+                 ready,
+                 waiting
+                 } state_t;
+
+   logic [3:0]  wait_count;
+   state_t state;
+
+
    always_ff @(posedge clk) begin
-			if (write_enable && membuscmd.mask_byte[0])begin
-         mem0[bus_address] <= writeValMem0;
-			end else begin
-         membusres[7:0] <= mem0[bus_address];
-      end
-      if (write_enable && membuscmd.mask_byte[1])begin
-         mem1[bus_address] <= writeValMem1;
+      if (rst) begin
+         membusres.data <= 0;
+         membusres.done <= 0;
       end else begin
-         membusres[15:8] <= mem1[bus_address];
-      end
-      if (write_enable && membuscmd.mask_byte[2])begin
-         mem2[bus_address] <= writeValMem2;
-      end else begin
-         membusres[23:16] <= mem2[bus_address];
-      end
-      if (write_enable && membuscmd.mask_byte[3])begin
-         mem3[bus_address] <= writeValMem3;
-      end else begin
-         membusres[31:24] <= mem3[bus_address];
+         if (state == ready) begin
+            if (membuscmd.start) begin
+               state <= waiting;
+               membusres <= 0;
+               wait_count <= 4;
+			         if (write_enable && membuscmd.mask_byte[0])begin
+                  mem0[bus_address] <= writeValMem0;
+               end
+               if (write_enable && membuscmd.mask_byte[1])begin
+                  mem1[bus_address] <= writeValMem1;
+               end
+               if (write_enable && membuscmd.mask_byte[2])begin
+                  mem2[bus_address] <= writeValMem2;
+               end
+               if (write_enable && membuscmd.mask_byte[3])begin
+                  mem3[bus_address] <= writeValMem3;
+               end
+            end
+         end else begin
+            if (wait_count == 0) begin
+               membusres.data[7:0] <= mem0[bus_address];
+               membusres.data[15:8] <= mem1[bus_address];
+               membusres.data[23:16] <= mem2[bus_address];
+               membusres.data[31:24] <= mem3[bus_address];
+               state <= ready;
+               membusres.done <= 0;
+            end else begin
+               wait_count <= wait_count - 1;
+               state <= waiting;
+               membusres.done <= (wait_count == 1);
+            end
+         end
       end
    end
 

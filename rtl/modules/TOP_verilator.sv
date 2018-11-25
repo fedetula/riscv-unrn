@@ -2,17 +2,19 @@ import Common::*;
 import MemoryBus::*;
 
 module TOP_verilator(input logic         clk,
-                     input logic         rst_cpu,
-                     input logic         probe_mem,
+                     input logic        rst_cpu,
+                     input logic        probe_mem,
 
-                     input logic [29:0]  probe_address,
-                     input logic         probe_mem_read, probe_mem_write,
-                     input logic [3:0]   probe_mask_byte,
-                     input               uint32 probe_write_data,
-                     output              uint32 probe_read_data,
-                     output logic [7:0]  uart_data,
-                     output logic        uart_write,
-                     output logic        test_done
+                     input logic [29:0] probe_address,
+                     input logic        probe_mem_read, probe_mem_write,
+                     input logic [3:0]  probe_mask_byte,
+                     input              uint32 probe_write_data,
+                     input logic        probe_start,
+                     output logic       probe_done,
+                     output             uint32 probe_read_data,
+                     output logic [7:0] uart_data,
+                     output logic       uart_write,
+                     output logic       test_done
                      );
 
    logic [29:0]                          cpu_bus_address;
@@ -38,12 +40,14 @@ module TOP_verilator(input logic         clk,
    assign uart_data = uart_bus_cmd.write_data[7:0];
    assign uart_bus_result = '{default: 0};
 
-   uint32 cpu_data_result;
+   MemoryBus::Result cpu_data_result;
 
    assign probe_bus_cmd.mem_read = probe_mem_read;
    assign probe_bus_cmd.mask_byte = probe_mask_byte;
    assign probe_bus_cmd.write_data = probe_write_data;
-   assign probe_read_data = probe_bus_result;
+   assign probe_bus_cmd.start = probe_start;
+   assign probe_read_data = probe_bus_result.data;
+   assign probe_done = probe_bus_result.done;
 
    logic                                 memory_write_enable;
 
