@@ -225,7 +225,14 @@ module multicycle(
                      instType_o = MEM_NOP;        // Invalidate access to memory
                   end
            endcase
-           stage_next = control_out.reg_write ? WRITEBACK : CALC_NEXT_PC;
+           if (exceptionPresent) begin
+              jumpToMtvec = 1;
+              PC_next = mtvec;
+              stage_next = PC_FETCH;
+              instType_o = MEM_NOP;
+           end else begin
+              stage_next = control_out.reg_write ? WRITEBACK : CALC_NEXT_PC;
+           end
         end
         WRITEBACK: begin
            unique case (alu_result)
@@ -322,4 +329,9 @@ module multicycle(
       endcase
    end
 
+   always_comb begin
+      if (dataAddress_o == 'hFFFF_FFFF) begin
+         $finish();
+      end
+   end
 endmodule
