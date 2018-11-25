@@ -329,9 +329,4 @@ module multicycle(
       endcase
    end
 
-   always_comb begin
-      if (dataAddress_o == 'hFFFF_FFFF) begin
-         $finish();
-      end
-   end
 endmodule
