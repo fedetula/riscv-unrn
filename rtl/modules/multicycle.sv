@@ -28,7 +28,6 @@ module multicycle(
    logic                     mtime_exc;
    logic                     control_decode;
    logic                     instr_decode;
-   logic                     previous_mem_done;
    decoded_instr_t dec_instr;
    uint32 immediate_val;
 
@@ -75,8 +74,6 @@ module multicycle(
       else if (stage_next == PC_FETCH) begin
          PC_reg <= PC_next;
       end
-
-      previous_mem_done <= readData_i.done;
    end
 
    instr_decoder deco(.clk,
@@ -197,11 +194,7 @@ module multicycle(
            instType_o = MEM_LW;
            instr_decode = 1;
            control_decode = 1;
-           if (previous_mem_done == 1 && readData_i.done == 0) begin
-              stage_next = READ_REGS;
-           end else begin
-              stage_next = INST_DEC;
-           end
+           stage_next = READ_REGS;
         end
         READ_REGS: begin
            stage_next = control_out.excRequest ? CALC_NEXT_PC : ALU;
@@ -243,86 +236,78 @@ module multicycle(
            end
         end
         WRITEBACK: begin
-           if (previous_mem_done == 1 && readData_i.done == 0) begin
-              unique case (alu_result)
-                riscV_unrn_pkg::MTIME_MEM_ADDRESS_LOW,
-                       riscV_unrn_pkg::MTIME_MEM_ADDRESS_HIGH,
-                       riscV_unrn_pkg::MTIMECMP_MEM_ADDRESS_LOW,
-                       riscV_unrn_pkg::MTIMECMP_MEM_ADDRESS_HIGH:
-                         begin
-                            mem_from_mtime = 1;
-                         end
-                default: begin
-                   mem_from_mtime = 0;
-                end
-              endcase
+           unique case (alu_result)
+             riscV_unrn_pkg::MTIME_MEM_ADDRESS_LOW,
+                    riscV_unrn_pkg::MTIME_MEM_ADDRESS_HIGH,
+                    riscV_unrn_pkg::MTIMECMP_MEM_ADDRESS_LOW,
+                    riscV_unrn_pkg::MTIMECMP_MEM_ADDRESS_HIGH:
+                      begin
+                         mem_from_mtime = 1;
+                      end
+             default: begin
+                mem_from_mtime = 0;
+             end
+           endcase
 
-              dataAddress_o = alu_result;
-              instType_o = control_out.instType;
-              csr_op = control_out.csr_op;
-              reg_file_we = control_out.reg_write & ~exceptionPresent;
-              data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i.data;
-              memToReg = control_out.mem_to_reg ? data_mem_out : alu_result;
-              dataToCsr = (control_out.csr_source) ? reg_file_read_data1 : 32'(control_out.rs1);
+           dataAddress_o = alu_result;
+           instType_o = control_out.instType;
+           csr_op = control_out.csr_op;
+           reg_file_we = control_out.reg_write & ~exceptionPresent;
+           data_mem_out = (mem_from_mtime) ?  mtimeData : readData_i.data;
+           memToReg = control_out.mem_to_reg ? data_mem_out : alu_result;
+           dataToCsr = (control_out.csr_source) ? reg_file_read_data1 : 32'(control_out.rs1);
 
-              unique case (control_out.regData)
-                2'b00: reg_file_write_data = memToReg;
-                2'b01: reg_file_write_data = PC_reg + 4;
-                2'b10: reg_file_write_data = csrReadData;
-                2'b11: reg_file_write_data = immediate_val;
-              endcase
-              stage_next = CALC_NEXT_PC;
-           end else begin // if (previous_mem_done == 1 && readData_i.done == 0)
-              stage_next = WRITEBACK;
-           end
+           unique case (control_out.regData)
+             2'b00: reg_file_write_data = memToReg;
+             2'b01: reg_file_write_data = PC_reg + 4;
+             2'b10: reg_file_write_data = csrReadData;
+             2'b11: reg_file_write_data = immediate_val;
+           endcase
+           stage_next = CALC_NEXT_PC;
         end
         CALC_NEXT_PC: begin
-           if (previous_mem_done == 1 && readData_i.done == 0) begin
-              alu_control = ALU_add;
+           alu_control = ALU_add;
 
-              if (control_out.excRequest) begin
-                 jumpToMtvec = 1;
-                 PC_next = mtvec;
+           if (control_out.excRequest) begin
+              jumpToMtvec = 1;
+              PC_next = mtvec;
+              stage_next = PC_FETCH;
+           end else  begin
+              if(control_out.is_jal) begin
+                 shouldTakeJump_next = 1;
+                 PC_JumpDst = alu_result;
+              end else if(control_out.is_jalr) begin
+                 shouldTakeJump_next = 1;
+                 PC_JumpDst = {alu_result[31:1], 1'b0};
+              end else if(control_out.is_branch & alu_result[0]) begin
+                 shouldTakeJump_next = 1;
+                 alu_data1 = PC_reg;
+                 alu_data2 = immediate_val;
+                 alu_start = 1;
+              end else if(control_out.excRet) begin
+                 PC_next = mepc;
+              end else begin
+                 alu_data1 = PC_reg;
+                 alu_data2 = 4;
+                 alu_start = 1;
+              end
+
+              if (alu_start) begin
+                 stage_next = WAIT_ALU_PC;
+              end else if (~shouldTakeJump_next) begin
                  stage_next = PC_FETCH;
-              end else  begin
-                 if(control_out.is_jal) begin
-                    shouldTakeJump_next = 1;
-                    PC_JumpDst = alu_result;
-                 end else if(control_out.is_jalr) begin
-                    shouldTakeJump_next = 1;
-                    PC_JumpDst = {alu_result[31:1], 1'b0};
-                 end else if(control_out.is_branch & alu_result[0]) begin
-                    shouldTakeJump_next = 1;
-                    alu_data1 = PC_reg;
-                    alu_data2 = immediate_val;
-                    alu_start = 1;
-                 end else if(control_out.excRet) begin
-                    PC_next = mepc;
-                 end else begin
-                    alu_data1 = PC_reg;
-                    alu_data2 = 4;
-                    alu_start = 1;
-                 end
-
-                 if (alu_start) begin
-                    stage_next = WAIT_ALU_PC;
-                 end else if (~shouldTakeJump_next) begin
+              end else begin
+                 excDetect_shouldJump = 1;
+                 stage_next = PC_FETCH;
+                 if (exceptionPresent) begin
+                    jumpToMtvec = 1;
+                    PC_next = mtvec;
                     stage_next = PC_FETCH;
-                 end else begin
-                    excDetect_shouldJump = 1;
+                 end else  begin
+                    PC_next = PC_JumpDst;
                     stage_next = PC_FETCH;
-                    if (exceptionPresent) begin
-                       jumpToMtvec = 1;
-                       PC_next = mtvec;
-                       stage_next = PC_FETCH;
-                    end else  begin
-                       PC_next = PC_JumpDst;
-                       stage_next = PC_FETCH;
-                    end
                  end
               end
-           end else begin // if (previous_mem_done == 1 && readData_i.done == 0)
-              stage_next = CALC_NEXT_PC;
            end
         end
         WAIT_ALU_PC: begin
