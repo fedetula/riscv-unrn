@@ -12,7 +12,7 @@ module TOP_verilator(input logic         clk,
                      output              uint32 probe_read_data,
                      output logic [7:0]  uart_data,
                      output logic        uart_write,
-                     output logic [31:0] pc_o
+                     output logic        test_done
                      );
 
    logic [29:0]                          cpu_bus_address;
@@ -129,7 +129,14 @@ module TOP_verilator(input logic         clk,
                      .exception_o(exception),
                      .pc_o(pc)
                      );
-   assign pc_o = pc;
+
+   always_ff @(posedge clk) begin
+      if (rst_cpu) begin
+         test_done <= 0;
+      end else if (pc == 'h80007FF0) begin
+         test_done <= 1;
+      end
+   end
 
 
 endmodule; // TOP_verilator

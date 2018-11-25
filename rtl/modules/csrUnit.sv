@@ -180,8 +180,6 @@ module csrUnit
                         mcycle_next = {csrWrite,mcycle_reg[31:0]};
                       end
         default: begin
-           // $display("unknown CSR: %p", address_i);
-           // $stop();
         end
       endcase
 
